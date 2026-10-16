@@ -18,15 +18,22 @@ contract (witness tests, mutants, history).
 ## [ADR-0003. Trust comes from the reader, never from the document](docs/adr/0003-trust-comes-from-the-reader.md)
 
 - **WPDF-T1** ([contract](contracts/WPDF-T1.json)). Verification MUST require a trust config supplied by the reader; keys are bound to actors only through it, and nothing in the document is read as trust.
-- **WPDF-T2** ([contract](contracts/WPDF-T2.json)). The reader's warrant verifier MUST run at settlement grade, and any finding other than the warning `unadopted root` MUST refuse.
+- **WPDF-T2** ([contract](contracts/WPDF-T2.json)). The reader's warrant verifier MUST run at settlement grade; any finding other than the warning `unadopted root`, and a verifier that produces no report, MUST refuse.
 
 ## [ADR-0004. One marked bundle, every entry named by its hash](docs/adr/0004-one-marked-bundle.md)
 
 - **WPDF-E1** ([contract](contracts/WPDF-E1.json)). A verifier MUST find exactly one bundle marker at a line start, MUST read exactly the declared length after it, and MUST refuse unless the SHA-256 of those bytes equals the declared digest.
 - **WPDF-E2** ([contract](contracts/WPDF-E2.json)). Every bundle entry MUST be named by the hash of its content — a blob by its SHA-256, a record by its WarrantID as computed by the reader's warrant — and a mismatch MUST refuse.
 - **WPDF-E3** ([contract](contracts/WPDF-E3.json)). A bundle saved on its own (the `warrant-bundle.json` attachment) MUST verify by the same rules, with no page comparison.
+- **WPDF-E4** ([contract](contracts/WPDF-E4.json)). The bundle MUST be UTF-8 JSON without `NaN` or `Infinity`, at most 8 MiB and 2,048 entries — the input limits of warrant's browser verifier — so that every implementation of this profile admits the same bundles; anything else MUST refuse.
 
 ## [ADR-0005. The page is checked, not signed](docs/adr/0005-the-page-is-checked-not-signed.md)
 
 - **WPDF-D1** ([contract](contracts/WPDF-D1.json)). A verifier MUST re-render the bundle with the profile's renderer, MUST report whether the file equals that rendering, and MUST print the signed text; under `--strict-display` a difference MUST refuse.
 - **WPDF-D2** ([contract](contracts/WPDF-D2.json)). The demo build MUST reproduce `demo/contract.pdf` and `demo/trust.json` byte for byte.
+- **WPDF-D3** ([contract](contracts/WPDF-D3.json)). The canonical text MUST be defined for every value warrant admits: a `ts` after 9999-12-31T23:59:59Z is written `unix <ts>`, never an error.
+
+## [ADR-0006. Two implementations, one verdict](docs/adr/0006-two-implementations-one-verdict.md)
+
+- **WPDF-I1** ([contract](contracts/WPDF-I1.json)). The Python and JavaScript implementations MUST produce the same outcome — the refusal code, or the display result, signers, signed text and grade — for every input in the counter-vector suite.
+- **WPDF-I2** ([contract](contracts/WPDF-I2.json)). The browser verifier MUST run the vendored `@s0fractal/warrant` 0.10.0 only if every vendored file matches the pinned manifest and the embedded WASM matches the package's `build.json`.

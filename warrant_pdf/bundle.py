@@ -11,7 +11,14 @@ from .profile import PROFILE, Refusal, is_hex64
 
 MARKER = b"%WARRANT-PDF-BUNDLE/"
 MARKER_LINE = re.compile(rb"%WARRANT-PDF-BUNDLE/0 len=(\d{1,9}) sha256=([0-9a-f]{64})\n")
-MAX_BUNDLE = 32 * 1024 * 1024
+# The browser profile of warrant's WASM verifier: 8 MiB of store input, 2,048 files.
+# The encoded bundle is larger than the store it decodes to, so this bound suffices.
+MAX_BUNDLE = 8 * 1024 * 1024
+MAX_ENTRIES = 2048
+
+
+def _no_constants(name):
+    raise ValueError(f"{name} is not JSON")
 
 
 def encode(records, blobs):
@@ -24,15 +31,19 @@ def encode(records, blobs):
 def decode(raw):
     """Returns (records, blobs). Blob names are checked here; record names need
     the reader's warrant (`canon`) and are checked by the verifier."""
+    if len(raw) > MAX_BUNDLE:
+        raise Refusal("BUNDLE_LIMIT", f"bundle larger than {MAX_BUNDLE} bytes")
     try:
-        doc = json.loads(raw)
-    except (UnicodeDecodeError, json.JSONDecodeError) as e:
+        doc = json.loads(raw.decode("utf-8"), parse_constant=_no_constants)
+    except (UnicodeDecodeError, ValueError) as e:
         raise Refusal("BUNDLE_MALFORMED", str(e))
     if not isinstance(doc, dict) or set(doc) != {"bundle", "records", "blobs"} or doc["bundle"] != PROFILE:
         raise Refusal("BUNDLE_MALFORMED", "top-level fields")
     records, blobs = doc["records"], {}
     if not isinstance(records, dict) or not isinstance(doc["blobs"], dict):
         raise Refusal("BUNDLE_MALFORMED", "records/blobs must be objects")
+    if len(records) + len(doc["blobs"]) > MAX_ENTRIES:
+        raise Refusal("BUNDLE_LIMIT", f"more than {MAX_ENTRIES} entries")
     for name, rec in records.items():
         if not is_hex64(name) or not isinstance(rec, dict) or set(rec) != {"body", "sigs"}:
             raise Refusal("BUNDLE_MALFORMED", f"record entry {name[:80]!r}")
@@ -69,7 +80,7 @@ def extract(pdf):
         raise Refusal("BUNDLE_MALFORMED", "marker line")
     length, digest = int(m.group(1)), m.group(2).decode()
     if length > MAX_BUNDLE:
-        raise Refusal("BUNDLE_MALFORMED", "bundle too large")
+        raise Refusal("BUNDLE_LIMIT", f"bundle larger than {MAX_BUNDLE} bytes")
     pos = m.end()
     if pdf[pos:pos + 7] != b"stream\n":
         raise Refusal("BUNDLE_MALFORMED", "stream keyword")

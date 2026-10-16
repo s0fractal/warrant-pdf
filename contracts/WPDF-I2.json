@@ -1,0 +1,22 @@
+{
+  "id": "WPDF-I2",
+  "profile": "warrant-pdf.contract.v1",
+  "adr": "docs/adr/0006-two-implementations-one-verdict.md",
+  "statement": "The browser verifier MUST run the vendored `@s0fractal/warrant` 0.10.0 only if every vendored file matches the pinned manifest and the embedded WASM matches the package's `build.json`.",
+  "witnesses": [
+    "test_tampered_vendored_verifier_is_refused",
+    "test_vendored_verifier_matches_its_pin"
+  ],
+  "mutants": [
+    "vendor-manifest-unchecked",
+    "vendor-wasm-unchecked"
+  ],
+  "decisions": [
+    {
+      "date": "2026-10-16",
+      "because": "The browser verifier runs a vendored copy of @s0fractal/warrant 0.10.0; pinning it is what makes it the reader's verifier rather than whatever a CDN serves.",
+      "statement_sha256": "ce4b3889f634ec868fe211c758771319bfea7e3afa135ca11fe678e9b29a3cd7",
+      "previous_statement_sha256": null
+    }
+  ]
+}

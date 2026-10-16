@@ -24,6 +24,7 @@ or "the last" bundle would let an appended one replace or shadow the original.
 - **WPDF-E1.** A verifier MUST find exactly one bundle marker at a line start, MUST read exactly the declared length after it, and MUST refuse unless the SHA-256 of those bytes equals the declared digest.
 - **WPDF-E2.** Every bundle entry MUST be named by the hash of its content — a blob by its SHA-256, a record by its WarrantID as computed by the reader's warrant — and a mismatch MUST refuse.
 - **WPDF-E3.** A bundle saved on its own (the `warrant-bundle.json` attachment) MUST verify by the same rules, with no page comparison.
+- **WPDF-E4.** The bundle MUST be UTF-8 JSON without `NaN` or `Infinity`, at most 8 MiB and 2,048 entries — the input limits of warrant's browser verifier — so that every implementation of this profile admits the same bundles; anything else MUST refuse.
 
 ## Considered
 
@@ -45,10 +46,16 @@ or "the last" bundle would let an appended one replace or shadow the original.
   measured, once ([record](../measurements/2026-10-16-resave.md)); this is not a CI
   check and says nothing about other tools.
 - A second marker, even one carrying a valid bundle, refuses as `BUNDLE_AMBIGUOUS`.
+- The limits are those of `@s0fractal/warrant` 0.10.0 (8 MiB of store input, 2,048
+  files). The encoded bundle is larger than the store it decodes to, so a bundle
+  under 8 MiB always fits. Python's `json` accepts `NaN`, while `JSON.parse` does not;
+  WPDF-E4 makes both implementations refuse it. The Python implementation found this
+  divergence before the JavaScript one was written.
 
 ## Counter-vectors
 
 `test_no_marker_refuses`, `test_second_bundle_appended_refuses`, `test_bundle_byte_flipped_refuses`,
 `test_blob_bytes_changed_under_old_name_refuses`, `test_record_under_wrong_name_refuses`,
 `test_photo_swapped_and_renamed_refuses`, `test_attachment_saved_from_a_viewer_verifies`,
-`test_bare_bundle_gets_the_same_checks`.
+`test_bare_bundle_gets_the_same_checks`, `test_nan_in_bundle_refuses`,
+`test_more_entries_than_the_browser_verifier_admits_refuses`, `test_oversized_bundle_is_refused_before_reading`.

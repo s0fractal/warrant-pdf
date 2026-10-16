@@ -1,0 +1,13 @@
+{
+  "sourceRevision": "0ec3b73d44b4adf5b6239f93c550264875163a24",
+  "coreVersion": "0.10.0",
+  "wasmSha256": "4d341994c6a12ceac30fe8c435acf6f74c0b118dc91afbb332a294370faab6df",
+  "limits": {
+    "bytes": 8388608,
+    "files": 2048,
+    "atpPerCheck": 1000000,
+    "workerTimeoutMs": 12000
+  },
+  "workingTree": "clean",
+  "packageVersion": "0.10.0"
+}

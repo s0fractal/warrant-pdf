@@ -19,6 +19,10 @@ class Refusal(Exception):
         self.code, self.detail = code, detail
 
 
+def _no_constants(name):
+    raise ValueError(f"{name} is not JSON")
+
+
 def is_hex64(value):
     return isinstance(value, str) and HEX64.fullmatch(value) is not None
 
@@ -29,8 +33,8 @@ def encode_terms(terms):
 
 def parse_terms(raw):
     try:
-        terms = json.loads(raw.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError) as e:
+        terms = json.loads(raw.decode("utf-8"), parse_constant=_no_constants)
+    except (UnicodeDecodeError, ValueError) as e:
         raise Refusal("TERMS_MALFORMED", str(e))
     if not isinstance(terms, dict) or set(terms) != TERMS_FIELDS:
         raise Refusal("TERMS_MALFORMED", f"fields must be exactly {sorted(TERMS_FIELDS)}")
@@ -51,7 +55,13 @@ def parse_terms(raw):
     return terms
 
 
+MAX_ISO_TS = 253402300799  # 9999-12-31T23:59:59Z
+
+
 def iso(ts):
+    """Total over warrant's ts domain (0..2^53-1): years past 9999 are written as `unix N`."""
+    if ts > MAX_ISO_TS:
+        return f"unix {ts}"
     return datetime.fromtimestamp(ts, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 

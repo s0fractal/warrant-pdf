@@ -8,7 +8,8 @@
     "test_without_reader_trust_refuses"
   ],
   "mutants": [
-    "no-trust-required"
+    "no-trust-required",
+    "js-no-trust-required"
   ],
   "decisions": [
     {

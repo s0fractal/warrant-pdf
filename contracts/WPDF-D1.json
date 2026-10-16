@@ -8,7 +8,8 @@
     "test_visible_text_edited_is_reported"
   ],
   "mutants": [
-    "always-match"
+    "always-match",
+    "js-always-match"
   ],
   "decisions": [
     {

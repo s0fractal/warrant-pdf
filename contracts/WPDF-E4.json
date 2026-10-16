@@ -1,0 +1,30 @@
+{
+  "id": "WPDF-E4",
+  "profile": "warrant-pdf.contract.v1",
+  "adr": "docs/adr/0004-one-marked-bundle.md",
+  "statement": "The bundle MUST be UTF-8 JSON without `NaN` or `Infinity`, at most 8 MiB and 2,048 entries — the input limits of warrant's browser verifier — so that every implementation of this profile admits the same bundles; anything else MUST refuse.",
+  "witnesses": [
+    "test_more_entries_than_the_browser_verifier_admits_refuses",
+    "test_nan_in_bundle_refuses",
+    "test_oversized_bundle_is_refused_before_reading"
+  ],
+  "mutants": [
+    "nan-accepted",
+    "entries-unbounded",
+    "size-unbounded",
+    "js-entries-unbounded"
+  ],
+  "decisions": [
+    {
+      "date": "2026-10-16",
+      "because": "Found while planning the browser verifier: the Python implementation admitted bundles the WASM verifier (@s0fractal/warrant 0.10.0: 8 MiB, 2,048 files) refuses, and Python's json parses NaN where JSON.parse refuses. Two implementations of one profile must admit the same bundles.",
+      "statement_sha256": "35f5579c4bf583aa7f036c50e851ece13da64ff590cc833bcdfa9b2557c78e24",
+      "previous_statement_sha256": null,
+      "counterexample": {
+        "witness": "test_more_entries_than_the_browser_verifier_admits_refuses",
+        "observed": "VERIFIED (2,049 entries, Python, before this statement); NaN in sigs refused as WARRANT, not BUNDLE_MALFORMED",
+        "expected": "REFUSED BUNDLE_LIMIT; REFUSED BUNDLE_MALFORMED"
+      }
+    }
+  ]
+}

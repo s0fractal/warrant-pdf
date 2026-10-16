@@ -4,7 +4,7 @@
     python3 tools/contracts.py check     # SPEC fresh; every statement has a contract,
                                          # the contract quotes it exactly, witnesses <-> tests,
                                          # every mutant named exists
-    python3 tools/contracts.py mutate    # every mutant must fail a witness of its own statement
+    python3 tools/contracts.py mutate [ID...]  # every mutant must fail a witness of its own statement
 
 A statement lives in exactly one ADR, as `- **WPDF-XX.** text`. Its contract
 (contracts/WPDF-XX.json) quotes it, names the tests that witness it (each such
@@ -139,11 +139,11 @@ def run_mutant(m):
         return m["id"], "killed" if own else "OFF_TARGET", failed
 
 
-def mutate():
+def mutate(only=()):
     if suite(ROOT)[0] != 0:
         print("FAIL the unmutated suite does not pass")
         return 1
-    mutants = json.loads(MUTANTS.read_text(encoding="utf-8"))
+    mutants = [m for m in json.loads(MUTANTS.read_text(encoding="utf-8")) if not only or m["id"] in only]
     with ThreadPoolExecutor(4) as pool:
         results = list(pool.map(run_mutant, mutants))
     for (mid, outcome, failed), m in zip(results, mutants):
@@ -163,6 +163,6 @@ if __name__ == "__main__":
     elif cmd == "check":
         sys.exit(check())
     elif cmd == "mutate":
-        sys.exit(mutate())
+        sys.exit(mutate(sys.argv[2:]))
     else:
         sys.exit(__doc__)

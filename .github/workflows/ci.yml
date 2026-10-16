@@ -13,7 +13,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
       - name: Install the reader's verifier (pinned)
         run: pip install warrant-verify==0.10.0
-      - name: Demo, contracts, counter-vectors, mutants
-        run: sh scripts/local-ci.sh
+      - name: Vendored verifier vs npm, demo, contracts, counter-vectors (Python = JS), mutants
+        run: NPM=1 sh scripts/local-ci.sh

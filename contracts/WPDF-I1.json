@@ -1,0 +1,20 @@
+{
+  "id": "WPDF-I1",
+  "profile": "warrant-pdf.contract.v1",
+  "adr": "docs/adr/0006-two-implementations-one-verdict.md",
+  "statement": "The Python and JavaScript implementations MUST produce the same outcome — the refusal code, or the display result, signers, signed text and grade — for every input in the counter-vector suite.",
+  "witnesses": [
+    "test_both_implementations_ran_and_agree_on_the_demo"
+  ],
+  "mutants": [
+    "js-text-drift"
+  ],
+  "decisions": [
+    {
+      "date": "2026-10-16",
+      "because": "Second implementation added for a browser verifier on warrant's WASM core. Writing it found four divergences in the Python implementation before any JS existed (WPDF-D3, WPDF-E4, WPDF-T2), and adding the parity hook found that the hook masked the display default (WPDF-A1).",
+      "statement_sha256": "3232d2c350d1f0ad1c79417b9548b0e8db978bcd9149b47c4a7af919af45c733",
+      "previous_statement_sha256": null
+    }
+  ]
+}

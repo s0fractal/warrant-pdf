@@ -7,7 +7,8 @@
     "test_re_rendered_elsewhere_still_verifies"
   ],
   "mutants": [
-    "display-strict-by-default"
+    "display-strict-by-default",
+    "js-display-strict-by-default"
   ],
   "decisions": [
     {
@@ -15,6 +16,18 @@
       "because": "Initial statement.",
       "statement_sha256": "409dd9503afc8c5a6002c53a2f4bcbd4cb4106c1ef96198532e76ea8ba7cf442",
       "previous_statement_sha256": null
+    },
+    {
+      "date": "2026-10-16",
+      "because": "Both display-strict-by-default mutants (Python and JS) SURVIVED once the parity hook was added: the hook passed strict_display=False explicitly on every call, and the JS CLI always passed strictDisplay, so the default this statement is about was never exercised. The hook now passes the option only when a test sets it.",
+      "counterexample": {
+        "witness": "test_re_rendered_elsewhere_still_verifies",
+        "mutant": "display-strict-by-default, js-display-strict-by-default",
+        "observed": "SURVIVED",
+        "expected": "killed"
+      },
+      "statement_sha256": "409dd9503afc8c5a6002c53a2f4bcbd4cb4106c1ef96198532e76ea8ba7cf442",
+      "previous_statement_sha256": "409dd9503afc8c5a6002c53a2f4bcbd4cb4106c1ef96198532e76ea8ba7cf442"
     }
   ]
 }

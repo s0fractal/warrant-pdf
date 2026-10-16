@@ -24,6 +24,7 @@ somewhere.
 
 - **WPDF-D1.** A verifier MUST re-render the bundle with the profile's renderer, MUST report whether the file equals that rendering, and MUST print the signed text; under `--strict-display` a difference MUST refuse.
 - **WPDF-D2.** The demo build MUST reproduce `demo/contract.pdf` and `demo/trust.json` byte for byte.
+- **WPDF-D3.** The canonical text MUST be defined for every value warrant admits: a `ts` after 9999-12-31T23:59:59Z is written `unix <ts>`, never an error.
 
 ## Considered
 
@@ -42,4 +43,4 @@ somewhere.
 ## Counter-vectors
 
 `test_demo_verifies_and_page_matches`, `test_visible_text_edited_is_reported`,
-`test_demo_rebuilds_byte_for_byte`.
+`test_demo_rebuilds_byte_for_byte`, `test_largest_timestamp_warrant_admits_verifies`.

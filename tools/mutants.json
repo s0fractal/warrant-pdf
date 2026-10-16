@@ -158,5 +158,221 @@
   "find": "    out = bytearray(b\"%PDF-1.7\\n%\\xe2\\xe3\\xcf\\xd3\\n\")",
   "replace": "    import time\n    out = bytearray(b\"%PDF-1.7\\n%%%d\\n\" % time.time_ns())",
   "why": "the demo no longer reproduces"
+ },
+ {
+  "id": "iso-partial",
+  "statement": "WPDF-D3",
+  "file": "warrant_pdf/profile.py",
+  "find": "    if ts > MAX_ISO_TS:\n        return f\"unix {ts}\"\n",
+  "replace": "",
+  "why": "a large valid ts crashes the verifier"
+ },
+ {
+  "id": "nan-accepted",
+  "statement": "WPDF-E4",
+  "file": "warrant_pdf/bundle.py",
+  "find": "json.loads(raw.decode(\"utf-8\"), parse_constant=_no_constants)",
+  "replace": "json.loads(raw.decode(\"utf-8\"))",
+  "why": "NaN is parsed; Python and browser verifiers diverge"
+ },
+ {
+  "id": "entries-unbounded",
+  "statement": "WPDF-E4",
+  "file": "warrant_pdf/bundle.py",
+  "find": "    if len(records) + len(doc[\"blobs\"]) > MAX_ENTRIES:",
+  "replace": "    if False:",
+  "why": "a bundle the browser verifier cannot admit verifies here"
+ },
+ {
+  "id": "size-unbounded",
+  "statement": "WPDF-E4",
+  "file": "warrant_pdf/bundle.py",
+  "find": "    if length > MAX_BUNDLE:",
+  "replace": "    if False:",
+  "why": "an oversized declared length is read instead of refused"
+ },
+ {
+  "id": "verifier-failure-escapes",
+  "statement": "WPDF-T2",
+  "file": "warrant_pdf/verify.py",
+  "find": "    except (wcli.WarrantError, OSError) as e:",
+  "replace": "    except () as e:",
+  "why": "a missing or broken verifier crashes instead of refusing"
+ },
+ {
+  "id": "js-display-strict-by-default",
+  "statement": "WPDF-A1",
+  "file": "web/profile.mjs",
+  "find": "export async function verify(pdf, trust, warrant, { strictDisplay = false } = {}) {",
+  "replace": "export async function verify(pdf, trust, warrant, { strictDisplay = true } = {}) {",
+  "why": "JS refuses a re-rendered file"
+ },
+ {
+  "id": "js-first-of-many-markers",
+  "statement": "WPDF-E1",
+  "file": "web/profile.mjs",
+  "find": "  if (starts.length !== 1) throw",
+  "replace": "  if (starts.length < 1) throw",
+  "why": "JS ignores an appended second bundle"
+ },
+ {
+  "id": "js-no-bundle-digest",
+  "statement": "WPDF-E1",
+  "file": "web/profile.mjs",
+  "find": "  if ((await sha256hex(data)) !== digest)",
+  "replace": "  if (false)",
+  "why": "JS skips the bundle digest"
+ },
+ {
+  "id": "js-no-blob-name-check",
+  "statement": "WPDF-E2",
+  "file": "web/profile.mjs",
+  "find": "    if ((await sha256hex(data)) !== name)",
+  "replace": "    if (false)",
+  "why": "JS accepts a blob under another name"
+ },
+ {
+  "id": "js-no-record-name-check",
+  "statement": "WPDF-E2",
+  "file": "web/profile.mjs",
+  "find": "      if (warrant.recordId(bytes) !== name)",
+  "replace": "      if (false)",
+  "why": "JS accepts a record under another name"
+ },
+ {
+  "id": "js-no-bare-bundle",
+  "statement": "WPDF-E3",
+  "file": "web/profile.mjs",
+  "find": "  const bare = latin1(pdf.subarray(0, 9)) === '{\"blobs\":';",
+  "replace": "  const bare = false;",
+  "why": "JS cannot verify a saved attachment"
+ },
+ {
+  "id": "js-entries-unbounded",
+  "statement": "WPDF-E4",
+  "file": "web/profile.mjs",
+  "find": "  if (Object.keys(records).length + Object.keys(doc.blobs).length > MAX_ENTRIES) {",
+  "replace": "  if (false) {",
+  "why": "JS admits more entries than the profile"
+ },
+ {
+  "id": "js-no-trust-required",
+  "statement": "WPDF-T1",
+  "file": "web/profile.mjs",
+  "find": "  if (trust === null || trust === undefined) {",
+  "replace": "  if (false) {",
+  "why": "JS verifies without a reader trust config"
+ },
+ {
+  "id": "js-tolerate-all-warnings",
+  "statement": "WPDF-T2",
+  "file": "web/profile.mjs",
+  "find": "f.message !== EXPECTED_WARNING || f.level !== \"WARN\"",
+  "replace": "f.level !== \"WARN\"",
+  "why": "JS tolerates any warning"
+ },
+ {
+  "id": "js-foreign-records-pass",
+  "statement": "WPDF-P1",
+  "file": "web/profile.mjs",
+  "find": "  if (others.length) throw",
+  "replace": "  if (false) throw",
+  "why": "JS ignores foreign records"
+ },
+ {
+  "id": "js-any-policy",
+  "statement": "WPDF-P1",
+  "file": "web/profile.mjs",
+  "find": "    if (!deepEqual(r.body.under, [profileHash])) throw",
+  "replace": "    if (false) throw",
+  "why": "JS reuses records filed under another policy"
+ },
+ {
+  "id": "js-evidence-unchecked",
+  "statement": "WPDF-P1",
+  "file": "web/profile.mjs",
+  "find": "  if (![termsHash, ...terms.attachments.map((a) => a.sha256)].every((h) => evidence.has(h))) {",
+  "replace": "  if (false) {",
+  "why": "JS shows an attachment the propose never relied on"
+ },
+ {
+  "id": "js-any-prior",
+  "statement": "WPDF-P2",
+  "file": "web/profile.mjs",
+  "find": "    if (!deepEqual(b.prior, [pid])) throw",
+  "replace": "    if (false) throw",
+  "why": "JS counts an accept of something else"
+ },
+ {
+  "id": "js-any-subject",
+  "statement": "WPDF-P2",
+  "file": "web/profile.mjs",
+  "find": "    if (!deepEqual(b.subject, body.subject)) throw",
+  "replace": "    if (false) throw",
+  "why": "JS lets an accept name another subject"
+ },
+ {
+  "id": "js-self-accept",
+  "statement": "WPDF-P2",
+  "file": "web/profile.mjs",
+  "find": "    if (b.actor.id === body.actor.id) throw",
+  "replace": "    if (false) throw",
+  "why": "JS lets the proposer accept"
+ },
+ {
+  "id": "js-parties-unchecked",
+  "statement": "WPDF-P3",
+  "file": "web/profile.mjs",
+  "find": "  if (missing.length) throw",
+  "replace": "  if (false) throw",
+  "why": "JS misses an unsigned named party"
+ },
+ {
+  "id": "js-no-accept-needed",
+  "statement": "WPDF-P3",
+  "file": "web/profile.mjs",
+  "find": "  if (!accepts.length) throw",
+  "replace": "  if (false) throw",
+  "why": "JS counts an unaccepted offer"
+ },
+ {
+  "id": "js-always-match",
+  "statement": "WPDF-D1",
+  "file": "web/profile.mjs",
+  "find": "equalBytes(await render(text, encodeBundle(records, blobs)), pdf) ? \"MATCH\" : \"DIFFERS\"",
+  "replace": "\"MATCH\"",
+  "why": "JS reports an edited page as signed"
+ },
+ {
+  "id": "js-iso-partial",
+  "statement": "WPDF-D3",
+  "file": "web/profile.mjs",
+  "find": "  if (ts > MAX_ISO_TS) return `unix ${ts}`;\n",
+  "replace": "",
+  "why": "JS crashes on a large valid ts"
+ },
+ {
+  "id": "js-text-drift",
+  "statement": "WPDF-I1",
+  "file": "web/profile.mjs",
+  "find": "  const lines = [\"WARRANT-PDF/0 CONTRACT\", \"\", `Title: ${terms.title}`, \"\"];",
+  "replace": "  const lines = [\"WARRANT-PDF/0 Contract\", \"\", `Title: ${terms.title}`, \"\"];",
+  "why": "the browser shows a different signed text than Python"
+ },
+ {
+  "id": "vendor-manifest-unchecked",
+  "statement": "WPDF-I2",
+  "file": "tools/vendor_check.py",
+  "find": "    if current(vendor) != manifest[\"files\"] or manifest[\"npm_integrity\"] != INTEGRITY:",
+  "replace": "    if False:",
+  "why": "a modified vendored verifier is accepted"
+ },
+ {
+  "id": "vendor-wasm-unchecked",
+  "statement": "WPDF-I2",
+  "file": "tools/vendor_check.py",
+  "find": "    return sha(wasm) == build[\"wasmSha256\"] and build[\"packageVersion\"] == VERSION and build[\"workingTree\"] == \"clean\"",
+  "replace": "    return True",
+  "why": "a swapped WASM passes when the manifest was rewritten"
  }
 ]

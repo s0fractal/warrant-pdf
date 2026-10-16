@@ -10,7 +10,9 @@
   ],
   "mutants": [
     "first-of-many-markers",
-    "no-bundle-digest"
+    "no-bundle-digest",
+    "js-first-of-many-markers",
+    "js-no-bundle-digest"
   ],
   "decisions": [
     {

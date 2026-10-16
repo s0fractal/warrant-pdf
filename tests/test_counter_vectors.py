@@ -3,6 +3,7 @@ and names the outcome it must produce. `witness:` lines bind a test to the
 normative statement it witnesses (contracts/, tools/contracts.py)."""
 import hashlib
 import json
+import re
 import shutil
 import sys
 import tempfile
@@ -15,9 +16,50 @@ sys.path.insert(0, str(ROOT / "demo"))
 import build_demo  # noqa: E402
 from warrant_pdf import bundle, make, render, wcli  # noqa: E402
 from warrant_pdf.profile import PROFILE_BLOB, Refusal, encode_terms  # noqa: E402
-from warrant_pdf.verify import verify  # noqa: E402
+from warrant_pdf.verify import verify as py_verify  # noqa: E402
+
+import os  # noqa: E402
+import subprocess  # noqa: E402
 
 CMD = "warrant"
+NODE = shutil.which("node")
+if os.environ.get("WPDF_REQUIRE_JS") == "1" and not NODE:
+    raise SystemExit("WPDF_REQUIRE_JS=1 but node is not on PATH")
+
+
+def js_outcome(pdf, trust, strict_display):
+    """The JavaScript implementation (web/profile.mjs on warrant's Rust core in WASM)."""
+    with tempfile.TemporaryDirectory() as tmp:
+        f = Path(tmp) / "input"
+        f.write_bytes(pdf)
+        args = [NODE, str(ROOT / "web" / "cli.mjs"), str(f), str(trust) if trust is not None else "-"]
+        flag = {None: [], True: ["--strict-display"], False: ["--no-strict-display"]}[strict_display]
+        out = subprocess.run(args + flag,
+                             capture_output=True, text=True)
+    if out.returncode != 0:
+        raise AssertionError(f"JS verifier crashed: {out.stderr.strip()[-400:]}")
+    d = json.loads(out.stdout)
+    if d["outcome"] == "REFUSED":
+        return ("REFUSED", d["code"])
+    return ("VERIFIED", d["display"], [tuple(x) for x in d["signers"]], d["text"], d["grade"])
+
+
+def verify(pdf, trust, cmd, **kw):
+    """Both implementations of the profile must agree on every input (parity).
+    The JS side always uses warrant's WASM core; it is skipped only when the test
+    deliberately breaks the Python side's verifier command."""
+    try:
+        r = py_verify(pdf, trust, cmd, **kw)  # defaults stay the implementation's own
+        py, err = ("VERIFIED", r.display, r.signers, r.text, r.grade), None
+    except Refusal as e:
+        py, err = ("REFUSED", e.code), e
+    if NODE and cmd == CMD:
+        js = js_outcome(pdf, trust, kw.get("strict_display"))
+        if js != py:
+            raise AssertionError(f"Python and JS disagree:\n  python: {py[:2]}\n  js:     {js[:2]}")
+    if err:
+        raise err
+    return r
 PDF = (ROOT / "demo" / "contract.pdf").read_bytes()
 TRUST = ROOT / "demo" / "trust.json"
 ALICE, BOB = list(build_demo.PARTIES)
@@ -84,9 +126,9 @@ class Scenario:
 
 class CounterVectors(unittest.TestCase):
 
-    def refused(self, pdf, code, trust=TRUST, **kw):
+    def refused(self, pdf, code, trust=TRUST, cmd=CMD, **kw):
         with self.assertRaises(Refusal) as cm:
-            verify(pdf, trust, CMD, **kw)
+            verify(pdf, trust, cmd, **kw)
         self.assertEqual(cm.exception.code, code, cm.exception.detail)
 
     def scenario(self, parties=None):
@@ -179,6 +221,25 @@ class CounterVectors(unittest.TestCase):
             verify(bundle.encode({a: rb, b: ra}, blobs), TRUST, CMD)
         self.assertEqual(cm.exception.code, "NAME_MISMATCH")
 
+    def test_nan_in_bundle_refuses(self):
+        """Python's json accepts NaN; JSON does not, and a browser verifier would refuse.
+        witness: WPDF-E4"""
+        raw = bundle.extract(PDF).decode()
+        self.refused(raw.replace('"sigs":[', '"sigs":[NaN,', 1).encode(), "BUNDLE_MALFORMED")
+
+    def test_more_entries_than_the_browser_verifier_admits_refuses(self):
+        """witness: WPDF-E4"""
+        records, blobs = parts()
+        for i in range(2049 - len(records) - len(blobs)):
+            data = b"%d" % i
+            blobs[hashlib.sha256(data).hexdigest()] = data
+        self.refused(rebuild(records, blobs), "BUNDLE_LIMIT")
+
+    def test_oversized_bundle_is_refused_before_reading(self):
+        """witness: WPDF-E4"""
+        forged = re.sub(rb"len=\d+", b"len=8388609", PDF, count=1)
+        self.refused(forged, "BUNDLE_LIMIT")
+
     # --- trust (ADR-0003) --------------------------------------------------
 
     def test_without_reader_trust_refuses(self):
@@ -200,6 +261,16 @@ class CounterVectors(unittest.TestCase):
         s = self.scenario()
         s.accept(s.propose(), key=s.mallory)
         self.refused(s.pdf(), "WARRANT")
+
+    def test_verification_ran_at_settlement_grade(self):
+        """Honest positive: Bob's bound key verifies, and the grade is the one that binds keys.
+        witness: WPDF-T2"""
+        self.assertEqual(verify(PDF, TRUST, CMD).grade, "settlement")
+
+    def test_unavailable_verifier_refuses(self):
+        """No report is not a pass, and not a crash either.
+        witness: WPDF-T2"""
+        self.refused(PDF, "WARRANT", cmd="/nonexistent/warrant")
 
     # --- profile (ADR-0002) ------------------------------------------------
 
@@ -311,6 +382,15 @@ class CounterVectors(unittest.TestCase):
         self.assertEqual(r.display, "DIFFERS")
         self.assertIn("3. The price is 100 EUR, paid in cash at handover.", r.text)
         self.refused(forged, "DISPLAY_DIFFERS", strict_display=True)
+
+    def test_largest_timestamp_warrant_admits_verifies(self):
+        """warrant admits ts up to 2^53-1; the year is then far past 9999.
+        witness: WPDF-D3"""
+        s = self.scenario()
+        s.accept(s.propose(ts=2**53 - 2), ts=2**53 - 1)
+        r = verify(s.pdf(), TRUST, CMD)
+        self.assertEqual(r.display, "MATCH")
+        self.assertIn("  accept by bob@demo.test at unix 9007199254740991", r.text)
 
     def test_re_rendered_elsewhere_still_verifies(self):
         """Another rendering of the same bundle: signatures hold, the page is flagged.

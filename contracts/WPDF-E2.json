@@ -9,7 +9,9 @@
   ],
   "mutants": [
     "no-blob-name-check",
-    "no-record-name-check"
+    "no-record-name-check",
+    "js-no-blob-name-check",
+    "js-no-record-name-check"
   ],
   "decisions": [
     {
