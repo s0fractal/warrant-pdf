@@ -5,6 +5,7 @@
   "statement": "The reader's warrant verifier MUST run at settlement grade; any finding other than the warning `unadopted root`, and a verifier that produces no report, MUST refuse.",
   "witnesses": [
     "test_accept_signed_by_another_key_for_the_same_actor_refuses",
+    "test_appended_junk_cosignature_refuses_today",
     "test_unavailable_verifier_refuses",
     "test_verification_ran_at_settlement_grade"
   ],
@@ -52,6 +53,17 @@
         "mutant": "base-grade",
         "observed": "OFF_TARGET (17 tests of other statements failed, none of WPDF-T2)",
         "expected": "a WPDF-T2 witness fails"
+      },
+      "statement_sha256": "0e4e7b6b2d25c043ee5ec649988d596beb9c5f9a1dfc32c36743319dedabb40d",
+      "previous_statement_sha256": "0e4e7b6b2d25c043ee5ec649988d596beb9c5f9a1dfc32c36743319dedabb40d"
+    },
+    {
+      "date": "2026-10-16",
+      "because": "Measured: an appended co-signature, valid or not, claiming an unrelated actor makes the contract refuse, because warrant reports it as a WARN. warrant's envelope rule says such a signature is reported and excluded, never fatal; this statement is broader than that. Kept as fail-closed and pinned as a known limitation; the narrower rule needs a verifier option (proposed to warrant as WRT-018) or message parsing.",
+      "counterexample": {
+        "witness": "test_appended_junk_cosignature_refuses_today",
+        "observed": "REFUSED WARRANT (WARN … signature does not verify (excluded): actor carol@demo.test)",
+        "expected (ideal)": "VERIFIED: the junk co-signature is excluded"
       },
       "statement_sha256": "0e4e7b6b2d25c043ee5ec649988d596beb9c5f9a1dfc32c36743319dedabb40d",
       "previous_statement_sha256": "0e4e7b6b2d25c043ee5ec649988d596beb9c5f9a1dfc32c36743319dedabb40d"

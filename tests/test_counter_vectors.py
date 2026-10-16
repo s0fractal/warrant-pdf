@@ -267,6 +267,19 @@ class CounterVectors(unittest.TestCase):
         witness: WPDF-T2"""
         self.assertEqual(verify(PDF, TRUST, CMD).grade, "settlement")
 
+    def test_appended_junk_cosignature_refuses_today(self):
+        """KNOWN LIMITATION, pinned so a change is noticed. Anyone holding a copy can
+        append a co-signature (signatures are outside the WarrantID). warrant reports
+        it as a WARN and excludes it; this profile cannot tell that WARN from the
+        accepting actor's own unbound signature without parsing message text, so it
+        refuses the whole contract. Warrant proposal WRT-018 would let the reader's
+        verifier make only the actor's own binding fatal.
+        witness: WPDF-T2"""
+        records, blobs = parts()
+        acc = next(w for w, r in records.items() if r["body"]["decision"] == "accept")
+        records[acc]["sigs"].append({"actor": "carol@demo.test", "key": "00" * 32, "sig": "00" * 64})
+        self.refused(rebuild(records, blobs), "WARRANT")
+
     def test_unavailable_verifier_refuses(self):
         """No report is not a pass, and not a crash either.
         witness: WPDF-T2"""

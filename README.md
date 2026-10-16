@@ -109,6 +109,9 @@ sh scripts/local-ci.sh        # demo reproduces, contracts check, tests, mutants
   P-256, which warrant does not yet accept. There is no hardware attestation.
 - The page shows printable ASCII. Other characters appear as `?`, and the verifier
   prints the exact text.
+- A co-signature appended to a record by anyone holding a copy makes the contract
+  refuse, though warrant itself would only exclude it (pinned limitation; warrant
+  proposal WRT-018).
 - After acceptance there is no lifecycle: a `supersede` or `reject` in the bundle
   refuses.
 - The browser page needs a static web server, because module workers do not
