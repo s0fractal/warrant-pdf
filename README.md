@@ -14,7 +14,7 @@ trust only from the reader.
 ## Try it (60 seconds)
 
 ```sh
-pip install warrant-verify==0.10.0        # the reader's verifier; warrant-pdf calls it
+pip install warrant-verify==0.11.0        # the reader's verifier; warrant-pdf calls it
 python3 -m warrant_pdf verify demo/contract.pdf --trust demo/trust.json
 ```
 
@@ -47,8 +47,10 @@ All of the following hold:
 
 1. The file carries exactly one bundle. Its bytes match the declared digest, and
    every entry is named by the hash of its content.
-2. Your warrant verifier, at settlement grade and under your trust config,
-   reports no finding except the expected `unadopted root`.
+2. Your warrant verifier, at settlement grade under your trust config and with
+   `--require-bound`, reports no error. Every record's own actor signed with a key
+   your config binds to that actor. Warnings, such as an excluded co-signature,
+   are printed, not fatal.
 3. The bundle holds one propose and accepts that answer it. Every party the terms
    name signed. Every attachment is in the propose's evidence.
 
@@ -86,10 +88,12 @@ sh scripts/local-ci.sh        # demo reproduces, contracts check, tests, mutants
 
 ## Findings so far
 
-- **Warrant's `ok: true` is not "signed by the named actor".** An accept for Bob
-  signed with Mallory's key verifies `ok: true, errors: 0` at settlement grade.
-  The only signal is a WARN, `signature unbound` (warrant SPEC §5.1, by design).
-  This profile refuses it ([ADR-0003](docs/adr/0003-trust-comes-from-the-reader.md),
+- **Warrant's `ok: true` was not "signed by the named actor".** An accept for Bob
+  signed with Mallory's key verified `ok: true, errors: 0` at settlement grade in
+  warrant 0.10.0. The only signal was a WARN, `signature unbound` (SPEC §5.1, by
+  design). This repository's workaround over-refused, so it proposed a fix to
+  warrant. Warrant 0.11.0 shipped it as `verify --require-bound` (WRT-018), and
+  this profile now uses it ([ADR-0003](docs/adr/0003-trust-comes-from-the-reader.md),
   [WPDF-T2](contracts/WPDF-T2.json)).
 - **A qpdf re-save drops both the marker line and bytes after `%%EOF`; the
   attachment survives.** Hence the saved attachment is itself verifiable
@@ -109,9 +113,6 @@ sh scripts/local-ci.sh        # demo reproduces, contracts check, tests, mutants
   P-256, which warrant does not yet accept. There is no hardware attestation.
 - The page shows printable ASCII. Other characters appear as `?`, and the verifier
   prints the exact text.
-- A co-signature appended to a record by anyone holding a copy makes the contract
-  refuse, though warrant itself would only exclude it (pinned limitation; warrant
-  proposal WRT-018).
 - After acceptance there is no lifecycle: a `supersede` or `reject` in the bundle
   refuses.
 - The browser page needs a static web server, because module workers do not

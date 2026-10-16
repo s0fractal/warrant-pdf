@@ -14,15 +14,15 @@ exists as a separate, narrow one.
 
 - The reader supplies a warrant trust config (warrant SPEC §12) that binds actor
   ids to the public keys the reader has learned out of band.
-- The reader runs a warrant verifier of their own choosing (`--warrant CMD`) at
-  settlement grade. warrant-pdf does not re-implement canonical form, WarrantIDs,
+- The reader runs a warrant verifier of their own choosing (`--warrant CMD`, warrant
+  0.11.0 or later) at settlement grade with `--require-bound` (warrant WRT-018). warrant-pdf does not re-implement canonical form, WarrantIDs,
   signatures or key state. It calls the verifier and reads its JSON report.
 - The bundle contains no trust config, and nothing in it is read as one.
 
 ## Normative
 
 - **WPDF-T1.** Verification MUST require a trust config supplied by the reader; keys are bound to actors only through it, and nothing in the document is read as trust.
-- **WPDF-T2.** The reader's warrant verifier MUST run at settlement grade; any finding other than the warning `unadopted root`, and a verifier that produces no report, MUST refuse.
+- **WPDF-T2.** The reader's warrant verifier MUST run at settlement grade with the required-binding option, so that a record whose own actor has no signature by a key the reader's trust config binds is an error; any `ERR`, and a verifier that produces no report, MUST refuse, while warnings are shown to the reader and do not refuse.
 
 ## Considered
 
@@ -36,27 +36,26 @@ exists as a separate, narrow one.
 
 ## Consequences
 
-- `unadopted root` is expected: a two-party contract has no genesis record. Any
-  other warning, including warrant's prose-only `reject` warning, refuses. Fail
-  closed beats a list of tolerated warnings that grows silently.
-- **Warrant's `ok: true` is not "signed by the named actor".** When an accept for
-  `bob@demo.test` is signed with a key the reader's trust config does not bind to Bob,
-  warrant 0.10.0 at settlement grade reports `ok: true, errors: 0` and the warning
-  `signature unbound: key … claims actor bob@demo.test`. That is warrant's specified
-  behaviour (SPEC §5.1: "Bound/unbound is a report unless a v0.3 policy explicitly
-  makes bound signatures required"). A consumer that reads only `ok` accepts Mallory's
-  signature as Bob's. WPDF-T2 refuses on that warning. Found while writing this
-  profile; see the WPDF-T2 contract history.
-- **Over-refusal (known limitation).** Signatures sit outside the WarrantID, so
-  anyone holding a copy can append a co-signature to a record. warrant reports such
-  a co-signature as a WARN and excludes it, by design. Because WPDF-T2 refuses on
-  every warning except one, a junk co-signature, even a cryptographically invalid
-  one claiming an unrelated actor, makes the whole contract refuse. This is fail
-  closed, and someone who controls a copy can corrupt it anyway, but it is broader
-  than the rule needs. A narrower rule ("refuse when the record's own actor has no
-  bound signature") needs either parsing warrant's message text, as the sibling
-  `oaip` does, or a verifier option. The latter is proposed to warrant as WRT-018.
-  Pinned by `test_appended_junk_cosignature_refuses_today`.
+- **Why `--require-bound`.** Warrant's `ok: true` is not "signed by the named
+  actor". With 0.10.0, an accept for `bob@demo.test` signed with a key the
+  reader's trust config does not bind to Bob verified `ok: true, errors: 0` at
+  settlement grade, with one warning, `signature unbound: key … claims actor
+  bob@demo.test`. That is specified behaviour (SPEC §5.1: bound/unbound is a
+  report). The first fix refused on every warning except `unadopted root`. That
+  closed the hole but over-refused: anyone holding a copy could append a junk
+  co-signature, which warrant excludes as a warning, and the whole contract
+  refused. Warrant 0.11.0 added `--require-bound` (WRT-018, proposed from this
+  repository): only the record's own actor must be bound, and co-signatures keep
+  warrant's report-and-exclude rule. WPDF-T2 now uses it. Warnings no longer
+  refuse; they are printed. The WPDF-T2 contract keeps the whole history.
+- **What stopped being refused with the warnings.** Each warning warrant emits was
+  reviewed when warnings became non-fatal. One had been holding a rule by accident:
+  an unresolvable evidence blob is a warning (warrant THREAT-MODEL A5), so a
+  contract whose signed photo was swapped verified. WPDF-P1 now requires the
+  attachment bytes. The others are harmless here or already refused:
+  - the actor's own signature failing becomes an ERR under `--require-bound`;
+  - `ts` order, a ski verdict mismatch and a missing policy blob are shown;
+  - a prose-only `reject` is a foreign record.
 - The reader has to obtain keys somewhere. This repository does not solve key
   distribution; it refuses to pretend the document can.
 
@@ -64,4 +63,5 @@ exists as a separate, narrow one.
 
 `test_without_reader_trust_refuses`, `test_counterparty_not_in_reader_trust_refuses`,
 `test_accept_signed_by_another_key_for_the_same_actor_refuses`, `test_unavailable_verifier_refuses`,
-`test_appended_junk_cosignature_refuses_today` (pins a known limitation).
+`test_verification_ran_at_settlement_grade`, `test_appended_junk_cosignature_is_excluded_not_fatal`,
+`test_valid_cosignature_by_an_unbound_key_is_shown_not_fatal`.

@@ -46,7 +46,7 @@ or "the last" bundle would let an appended one replace or shadow the original.
   measured, once ([record](../measurements/2026-10-16-resave.md)); this is not a CI
   check and says nothing about other tools.
 - A second marker, even one carrying a valid bundle, refuses as `BUNDLE_AMBIGUOUS`.
-- The limits are those of `@s0fractal/warrant` 0.10.0 (8 MiB of store input, 2,048
+- The limits are those of `@s0fractal/warrant` 0.10.0 and 0.11.0 (8 MiB of store input, 2,048
   files). The encoded bundle is larger than the store it decodes to, so a bundle
   under 8 MiB always fits. Python's `json` accepts `NaN`, while `JSON.parse` does not;
   WPDF-E4 makes both implementations refuse it. The Python implementation found this

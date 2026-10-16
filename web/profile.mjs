@@ -231,6 +231,8 @@ export function arrange(records, blobs, profileHash) {
   if (![termsHash, ...terms.attachments.map((a) => a.sha256)].every((h) => evidence.has(h))) {
     throw new Refusal("PROFILE_EVIDENCE", "the propose evidence does not list the terms and every attachment");
   }
+  const absent = terms.attachments.filter((a) => !Object.hasOwn(blobs, a.sha256)).map((a) => a.name);
+  if (absent.length) throw new Refusal("PROFILE_ATTACHMENT_MISSING", `attachment ${absent[0]} is not in the bundle`);
   for (const [w, r] of accepts) {
     const b = r.body;
     if (!deepEqual(b.prior, [pid])) throw new Refusal("PROFILE_PRIOR", `accept ${w} does not respond to exactly the propose`);
@@ -350,16 +352,19 @@ export async function verify(pdf, trust, warrant, { strictDisplay = false } = {}
       files[`records/${name}.json`] = bytes;
     }
     for (const [name, data] of Object.entries(blobs)) files[`blobs/${name}`] = data;
-    report = warrant.verifyStore(files, { trust });
+    report = warrant.verifyStore(files, { trust, requireBound: true });
   } catch (e) {
     if (e instanceof Refusal) throw e;
     throw new Refusal("WARRANT", `the reader's verifier produced no report: ${e.message ?? e}`);
   }
-  const unexpected = report.findings.filter((f) => f.message !== EXPECTED_WARNING || f.level !== "WARN");
-  if (!report.ok || report.errors || unexpected.length) {
-    const f = (unexpected.length ? unexpected : report.findings.length ? report.findings : [{ message: "not ok" }])[0];
+  // WPDF-T2: requireBound makes an unbound actor an ERR; warnings are shown, not fatal.
+  const errors = report.findings.filter((f) => f.level !== "WARN");
+  if (!report.ok || report.errors || errors.length) {
+    const f = (errors.length ? errors : [{ message: "not ok" }])[0];
     throw new Refusal("WARRANT", `${f.level ?? ""} ${(f.subject ?? "").slice(0, 16)} ${f.message}`.trim());
   }
+  const warnings = report.findings.filter((f) => f.message !== EXPECTED_WARNING)
+    .map((f) => `${f.subject.slice(0, 12)} ${f.message}`);
   const profileHash = await sha256hex(utf8.encode(`{"profile":"${PROFILE}"}`));
   const { terms, propose, accepts } = arrange(records, blobs, profileHash);
   const text = canonicalText(terms, propose, accepts);
@@ -369,5 +374,5 @@ export async function verify(pdf, trust, warrant, { strictDisplay = false } = {}
     throw new Refusal("DISPLAY_DIFFERS", "the file is not the canonical rendering of what was signed");
   }
   const signers = [propose, ...accepts].map(([, r]) => [r.body.decision, r.body.actor.id]);
-  return { display, text, signers, grade: report.grade };
+  return { display, text, signers, grade: report.grade, warnings };
 }

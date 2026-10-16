@@ -49,9 +49,9 @@
   <div id="verdict"></div>
   <p id="note"></p>
   <pre id="text" hidden></pre>
-  <footer>Profile <code>warrant-pdf/0</code> · verifier <code>@s0fractal/warrant</code> 0.10.0 (Rust core, WebAssembly),
+  <footer>Profile <code>warrant-pdf/0</code> · verifier <code>@s0fractal/warrant</code> 0.11.0 (Rust core, WebAssembly),
     vendored and pinned by npm integrity. VERIFIED means: one bundle, every entry named by its hash, your warrant
-    verifier at settlement grade found nothing but <code>unadopted root</code>, and the profile rules hold. It does not
+    verifier at settlement grade, requiring each record's own actor to be bound, found no error, and the profile rules hold. It does not
     say who a key belongs to beyond your trust config, or that the photo shows what it claims.</footer>
 </main>
 <script type="module">
@@ -85,7 +85,8 @@
       const page = { MATCH: "The page is exactly the rendering of what was signed.",
         DIFFERS: "The page is NOT the rendering of what was signed (re-exported or edited). Read the signed text below, not the page.",
         NO_PAGE: "A bare bundle was verified; there is no page to compare." }[r.display];
-      show(r.display === "DIFFERS" ? "warn" : "ok", `VERIFIED: ${who}`, `${page} Grade: ${r.grade}.`, r.text.join("\n"));
+      const warn = r.warnings.length ? ` Warnings (not fatal): ${r.warnings.join("; ")}.` : "";
+      show(r.display === "DIFFERS" ? "warn" : "ok", `VERIFIED: ${who}`, `${page} Grade: ${r.grade}.${warn}`, r.text.join("\n"));
     };
     worker.onerror = (e) => { clearTimeout(timer); worker.terminate(); show("bad", "Verifier error", e.message, ""); $("go").disabled = false; };
     worker.postMessage({ file: state.pdf, trust: state.trust, strict: $("strict").checked });

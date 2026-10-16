@@ -41,7 +41,7 @@ def js_outcome(pdf, trust, strict_display):
     d = json.loads(out.stdout)
     if d["outcome"] == "REFUSED":
         return ("REFUSED", d["code"])
-    return ("VERIFIED", d["display"], [tuple(x) for x in d["signers"]], d["text"], d["grade"])
+    return ("VERIFIED", d["display"], [tuple(x) for x in d["signers"]], d["text"], d["grade"], d["warnings"])
 
 
 def verify(pdf, trust, cmd, **kw):
@@ -50,7 +50,7 @@ def verify(pdf, trust, cmd, **kw):
     deliberately breaks the Python side's verifier command."""
     try:
         r = py_verify(pdf, trust, cmd, **kw)  # defaults stay the implementation's own
-        py, err = ("VERIFIED", r.display, r.signers, r.text, r.grade), None
+        py, err = ("VERIFIED", r.display, r.signers, r.text, r.grade, r.warnings), None
     except Refusal as e:
         py, err = ("REFUSED", e.code), e
     if NODE and cmd == CMD:
@@ -196,14 +196,15 @@ class CounterVectors(unittest.TestCase):
         self.refused(rebuild({a: rb, b: ra}, blobs), "NAME_MISMATCH")
 
     def test_photo_swapped_and_renamed_refuses(self):
-        """A different photo under its own correct name: the signed evidence no longer resolves."""
+        """A different photo under its own correct name: the signed evidence no longer resolves.
+        warrant only warns about an unresolvable evidence blob, so the profile must refuse.
+        witness: WPDF-P1"""
         records, blobs = parts()
         old = hashlib.sha256(build_demo.png()).hexdigest()
         new = build_demo.png(33, 24)
         del blobs[old]
         blobs[hashlib.sha256(new).hexdigest()] = new
-        with self.assertRaises(Refusal):
-            verify(rebuild(records, blobs), TRUST, CMD)
+        self.refused(rebuild(records, blobs), "PROFILE_ATTACHMENT_MISSING")
 
     def test_attachment_saved_from_a_viewer_verifies(self):
         """A PDF tool re-saved the file and dropped the marker line; the attachment survived.
@@ -267,18 +268,31 @@ class CounterVectors(unittest.TestCase):
         witness: WPDF-T2"""
         self.assertEqual(verify(PDF, TRUST, CMD).grade, "settlement")
 
-    def test_appended_junk_cosignature_refuses_today(self):
-        """KNOWN LIMITATION, pinned so a change is noticed. Anyone holding a copy can
-        append a co-signature (signatures are outside the WarrantID). warrant reports
-        it as a WARN and excludes it; this profile cannot tell that WARN from the
-        accepting actor's own unbound signature without parsing message text, so it
-        refuses the whole contract. Warrant proposal WRT-018 would let the reader's
-        verifier make only the actor's own binding fatal.
+    def test_appended_junk_cosignature_is_excluded_not_fatal(self):
+        """Anyone holding a copy can append a co-signature (signatures sit outside the
+        WarrantID). An invalid one claiming an unrelated actor is excluded by warrant and
+        shown as a warning; the contract still verifies. Until warrant 0.11.0 this profile
+        refused here (the limitation pinned in 8b21a6e).
         witness: WPDF-T2"""
         records, blobs = parts()
         acc = next(w for w, r in records.items() if r["body"]["decision"] == "accept")
         records[acc]["sigs"].append({"actor": "carol@demo.test", "key": "00" * 32, "sig": "00" * 64})
-        self.refused(rebuild(records, blobs), "WARRANT")
+        r = verify(rebuild(records, blobs), TRUST, CMD)
+        self.assertEqual(r.signers, [("propose", ALICE), ("accept", BOB)])
+        self.assertTrue(any("signature does not verify (excluded)" in w for w in r.warnings), r.warnings)
+
+    def test_valid_cosignature_by_an_unbound_key_is_shown_not_fatal(self):
+        """A cryptographically valid co-signature by a key nobody bound, claiming another
+        actor: warrant reports it unbound; it does not count and does not refuse.
+        witness: WPDF-T2"""
+        from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+        records, blobs = parts()
+        acc = next(w for w, r in records.items() if r["body"]["decision"] == "accept")
+        k = Ed25519PrivateKey.from_private_bytes(hashlib.sha256(b"junk").digest())
+        records[acc]["sigs"].append({"actor": "carol@demo.test", "key": k.public_key().public_bytes_raw().hex(),
+                                     "sig": k.sign(b"warrant-sig-v1:" + bytes.fromhex(acc)).hex()})
+        r = verify(rebuild(records, blobs), TRUST, CMD)
+        self.assertTrue(any("signature unbound" in w and "carol@demo.test" in w for w in r.warnings), r.warnings)
 
     def test_unavailable_verifier_refuses(self):
         """No report is not a pass, and not a crash either.

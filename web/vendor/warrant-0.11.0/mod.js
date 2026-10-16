@@ -63,7 +63,7 @@ function transport(files) {
 /** Verify raw store bytes. Throws on admission refusal or unfinished execution. */
 export function verifyStore(files, options = {}) {
     const input = transport(files);
-    return JSON.parse(execute(() => verify_store(input, options.trust)));
+    return JSON.parse(execute(() => verify_store(input, options.trust, options.requireBound === true)));
 }
 /** Compute a body ID; this alone does not verify the record or its signature. */
 export function recordId(bytes) {

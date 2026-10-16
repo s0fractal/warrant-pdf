@@ -17,6 +17,6 @@ jobs:
         with:
           node-version: "22"
       - name: Install the reader's verifier (pinned)
-        run: pip install warrant-verify==0.10.0
+        run: pip install warrant-verify==0.11.0
       - name: Vendored verifier vs npm, demo, contracts, counter-vectors (Python = JS), mutants
         run: NPM=1 sh scripts/local-ci.sh

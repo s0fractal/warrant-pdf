@@ -11,14 +11,14 @@ contract (witness tests, mutants, history).
 
 ## [ADR-0002. Two parties are a propose and its accepts](docs/adr/0002-two-parties-are-propose-and-accept.md)
 
-- **WPDF-P1** ([contract](contracts/WPDF-P1.json)). A bundle MUST hold exactly one propose and otherwise only accepts; every record MUST be filed under exactly the profile blob; the propose subject MUST name the terms blob, and its evidence MUST list the terms and every attachment the terms name.
+- **WPDF-P1** ([contract](contracts/WPDF-P1.json)). A bundle MUST hold exactly one propose and otherwise only accepts; every record MUST be filed under exactly the profile blob; the propose subject MUST name the terms blob, its evidence MUST list the terms and every attachment the terms name, and the bytes of every such attachment MUST be in the bundle.
 - **WPDF-P2** ([contract](contracts/WPDF-P2.json)). Every accept MUST respond to exactly the propose (its prior is the propose alone), name the same subject, and be filed by an actor other than the proposer.
 - **WPDF-P3** ([contract](contracts/WPDF-P3.json)). Every party the terms name MUST have filed the propose or an accept, and at least one accept MUST exist.
 
 ## [ADR-0003. Trust comes from the reader, never from the document](docs/adr/0003-trust-comes-from-the-reader.md)
 
 - **WPDF-T1** ([contract](contracts/WPDF-T1.json)). Verification MUST require a trust config supplied by the reader; keys are bound to actors only through it, and nothing in the document is read as trust.
-- **WPDF-T2** ([contract](contracts/WPDF-T2.json)). The reader's warrant verifier MUST run at settlement grade; any finding other than the warning `unadopted root`, and a verifier that produces no report, MUST refuse.
+- **WPDF-T2** ([contract](contracts/WPDF-T2.json)). The reader's warrant verifier MUST run at settlement grade with the required-binding option, so that a record whose own actor has no signature by a key the reader's trust config binds is an error; any `ERR`, and a verifier that produces no report, MUST refuse, while warnings are shown to the reader and do not refuse.
 
 ## [ADR-0004. One marked bundle, every entry named by its hash](docs/adr/0004-one-marked-bundle.md)
 
@@ -36,4 +36,4 @@ contract (witness tests, mutants, history).
 ## [ADR-0006. Two implementations, one verdict](docs/adr/0006-two-implementations-one-verdict.md)
 
 - **WPDF-I1** ([contract](contracts/WPDF-I1.json)). The Python and JavaScript implementations MUST produce the same outcome — the refusal code, or the display result, signers, signed text and grade — for every input in the counter-vector suite.
-- **WPDF-I2** ([contract](contracts/WPDF-I2.json)). The browser verifier MUST run the vendored `@s0fractal/warrant` 0.10.0 only if every vendored file matches the pinned manifest and the embedded WASM matches the package's `build.json`.
+- **WPDF-I2** ([contract](contracts/WPDF-I2.json)). The browser verifier MUST run the vendored `@s0fractal/warrant` 0.11.0 only if every vendored file matches the pinned manifest and the embedded WASM matches the package's `build.json`.

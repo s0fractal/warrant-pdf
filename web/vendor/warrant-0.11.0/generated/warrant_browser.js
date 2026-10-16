@@ -96,9 +96,10 @@ function takeFromExternrefTable0(idx) {
 /**
  * @param {string} input
  * @param {string | null} [trust_config]
+ * @param {boolean | null} [require_bound]
  * @returns {string}
  */
-export function verify_store(input, trust_config) {
+export function verify_store(input, trust_config, require_bound) {
     let deferred4_0;
     let deferred4_1;
     try {
@@ -106,7 +107,7 @@ export function verify_store(input, trust_config) {
         const len0 = WASM_VECTOR_LEN;
         var ptr1 = isLikeNone(trust_config) ? 0 : passStringToWasm0(trust_config, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len1 = WASM_VECTOR_LEN;
-        const ret = wasm.verify_store(ptr0, len0, ptr1, len1);
+        const ret = wasm.verify_store(ptr0, len0, ptr1, len1, isLikeNone(require_bound) ? 0xFFFFFF : require_bound ? 1 : 0);
         var ptr3 = ret[0];
         var len3 = ret[1];
         if (ret[3]) {
