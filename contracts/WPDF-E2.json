@@ -1,0 +1,22 @@
+{
+  "id": "WPDF-E2",
+  "profile": "warrant-pdf.contract.v1",
+  "adr": "docs/adr/0004-one-marked-bundle.md",
+  "statement": "Every bundle entry MUST be named by the hash of its content — a blob by its SHA-256, a record by its WarrantID as computed by the reader's warrant — and a mismatch MUST refuse.",
+  "witnesses": [
+    "test_blob_bytes_changed_under_old_name_refuses",
+    "test_record_under_wrong_name_refuses"
+  ],
+  "mutants": [
+    "no-blob-name-check",
+    "no-record-name-check"
+  ],
+  "decisions": [
+    {
+      "date": "2026-10-16",
+      "because": "Initial statement.",
+      "statement_sha256": "33f4550028524b49a4e16815f8c1366eff161c138b82bcca2a76492e7a2dc02f",
+      "previous_statement_sha256": null
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "WPDF-T1",
+  "profile": "warrant-pdf.contract.v1",
+  "adr": "docs/adr/0003-trust-comes-from-the-reader.md",
+  "statement": "Verification MUST require a trust config supplied by the reader; keys are bound to actors only through it, and nothing in the document is read as trust.",
+  "witnesses": [
+    "test_counterparty_not_in_reader_trust_refuses",
+    "test_without_reader_trust_refuses"
+  ],
+  "mutants": [
+    "no-trust-required"
+  ],
+  "decisions": [
+    {
+      "date": "2026-10-16",
+      "because": "Initial statement.",
+      "statement_sha256": "114db410f70224d9af6eb1dcc4309d3f3112629201ae8bf164a8dbdfb54d712b",
+      "previous_statement_sha256": null
+    }
+  ]
+}

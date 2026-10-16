@@ -1,0 +1,26 @@
+{
+  "id": "WPDF-P1",
+  "profile": "warrant-pdf.contract.v1",
+  "adr": "docs/adr/0002-two-parties-are-propose-and-accept.md",
+  "statement": "A bundle MUST hold exactly one propose and otherwise only accepts; every record MUST be filed under exactly the profile blob; the propose subject MUST name the terms blob, and its evidence MUST list the terms and every attachment the terms name.",
+  "witnesses": [
+    "test_attachment_not_in_evidence_refuses",
+    "test_filed_under_another_policy_refuses",
+    "test_foreign_record_refuses",
+    "test_second_propose_refuses"
+  ],
+  "mutants": [
+    "foreign-records-pass",
+    "many-proposes",
+    "any-policy",
+    "evidence-unchecked"
+  ],
+  "decisions": [
+    {
+      "date": "2026-10-16",
+      "because": "Initial statement.",
+      "statement_sha256": "1ae15657bdff6b6aec548034c1da6ccaf4a8029a965956a88e4b10a021233b16",
+      "previous_statement_sha256": null
+    }
+  ]
+}

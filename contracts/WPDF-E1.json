@@ -1,0 +1,23 @@
+{
+  "id": "WPDF-E1",
+  "profile": "warrant-pdf.contract.v1",
+  "adr": "docs/adr/0004-one-marked-bundle.md",
+  "statement": "A verifier MUST find exactly one bundle marker at a line start, MUST read exactly the declared length after it, and MUST refuse unless the SHA-256 of those bytes equals the declared digest.",
+  "witnesses": [
+    "test_bundle_byte_flipped_refuses",
+    "test_no_marker_refuses",
+    "test_second_bundle_appended_refuses"
+  ],
+  "mutants": [
+    "first-of-many-markers",
+    "no-bundle-digest"
+  ],
+  "decisions": [
+    {
+      "date": "2026-10-16",
+      "because": "Initial statement.",
+      "statement_sha256": "f80b97502ea2b756ac5a152f8502bccc963155cc0a2b687c053e7ef787011a12",
+      "previous_statement_sha256": null
+    }
+  ]
+}

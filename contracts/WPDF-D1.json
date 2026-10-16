@@ -1,0 +1,21 @@
+{
+  "id": "WPDF-D1",
+  "profile": "warrant-pdf.contract.v1",
+  "adr": "docs/adr/0005-the-page-is-checked-not-signed.md",
+  "statement": "A verifier MUST re-render the bundle with the profile's renderer, MUST report whether the file equals that rendering, and MUST print the signed text; under `--strict-display` a difference MUST refuse.",
+  "witnesses": [
+    "test_demo_verifies_and_page_matches",
+    "test_visible_text_edited_is_reported"
+  ],
+  "mutants": [
+    "always-match"
+  ],
+  "decisions": [
+    {
+      "date": "2026-10-16",
+      "because": "Initial statement.",
+      "statement_sha256": "e41d3333cf434bffa1aad2f14ba4f0f83112cbfda7829117e353c0e306afe5f7",
+      "previous_statement_sha256": null
+    }
+  ]
+}

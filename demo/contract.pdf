@@ -1,0 +1,75 @@
+%PDF-1.7
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R /Names << /EmbeddedFiles 4 0 R >> >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 1 /Kids [7 0 R] >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+4 0 obj
+<< /Names [(warrant-bundle.json) 5 0 R] >>
+endobj
+5 0 obj
+<< /Type /Filespec /F (warrant-bundle.json) /UF (warrant-bundle.json) /EF << /F 6 0 R >> >>
+endobj
+6 0 obj
+<< /Type /EmbeddedFile /Subtype /application#2Fjson /Length 5027 >>
+%WARRANT-PDF-BUNDLE/0 len=5027 sha256=e92fe5e0b5f47676b487a3f83a47cce9cafba56fde8292bf5e192037be05e47c
+stream
+{"blobs":{"4f7429774afaebb3d2e0b5a978a981fefbe7fe39b8cb6c78572cffe9c422ccc6":"eyJwcm9maWxlIjoid2FycmFudC1wZGYvMCJ9","6334c2cf7f93e73618a5ee2fc944ee071fe20733817db9e4f106dea13a15fa63":"eyJhdHRhY2htZW50cyI6W3sibmFtZSI6InBob3RvLnBuZyIsInNoYTI1NiI6ImFiMDllOGFhYTFjNjJiNmM0ZTMxYTQwZTA4YTkzZjI1YTI5OWJiZTVmMDE0NTZhZjA0ZGE4NzdlOTZkZjI1NzAifV0sImNsYXVzZXMiOlsiQWxpY2UgaGFuZHMgb3ZlciB0aGUgYmljeWNsZSBzaG93biBpbiBwaG90by5wbmcgdG8gQm9iIG9uIDIwMjYtMTAtMTYuIiwiQm9iIGNvbmZpcm1zIHRoZSBjb25kaXRpb24gc2hvd24gaW4gdGhlIHBob3RvLCBpbmNsdWRpbmcgdGhlIHNjcmF0Y2ggb24gdGhlIGZyYW1lLiIsIlRoZSBwcmljZSBpcyAxMDAgRVVSLCBwYWlkIGluIGNhc2ggYXQgaGFuZG92ZXIuIl0sInBhcnRpZXMiOlsiYWxpY2VAZGVtby50ZXN0IiwiYm9iQGRlbW8udGVzdCJdLCJwcm9maWxlIjoid2FycmFudC1wZGYvMCIsInRpdGxlIjoiSGFuZG92ZXIgb2YgYSBiaWN5Y2xlIChkZW1vKSJ9","ab09e8aaa1c62b6c4e31a40e08a93f25a299bbe5f01456af04da877e96df2570":"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"},"bundle":"warrant-pdf/0","records":{"7c0e948bf8ca86cc445946fe6490260ce7eec779cc89faf581ab54e0569479ec":{"body":{"actor":{"id":"bob@demo.test"},"because":[{"kind":"prose","text":"I saw the terms and the photo before signing."}],"decision":"accept","evidence":[],"prior":["f76867f2b9a448f62ff271e2f99d791a58864b03899a3ce1a0884be6fe1a85f5"],"subject":{"hash":"6334c2cf7f93e73618a5ee2fc944ee071fe20733817db9e4f106dea13a15fa63","note":"Handover of a bicycle (demo)"},"ts":1792108801,"under":["4f7429774afaebb3d2e0b5a978a981fefbe7fe39b8cb6c78572cffe9c422ccc6"],"warrant":"0.2"},"sigs":[{"actor":"bob@demo.test","key":"880b95ee693cb4a37b695050bc5f3c779d84e7576b4ddfd0ab4f489ecf5c11ab","sig":"8881fa10b110b2e8fc4844b9c7681e5594759efa08caac0cbdc63fa1244043500feffe1654c967cbf68f1f8a793fd60b191a3a567a08ee96b19e385b87fb350c"}]},"f76867f2b9a448f62ff271e2f99d791a58864b03899a3ce1a0884be6fe1a85f5":{"body":{"actor":{"id":"alice@demo.test"},"because":[],"decision":"propose","evidence":["6334c2cf7f93e73618a5ee2fc944ee071fe20733817db9e4f106dea13a15fa63","ab09e8aaa1c62b6c4e31a40e08a93f25a299bbe5f01456af04da877e96df2570"],"prior":[],"subject":{"hash":"6334c2cf7f93e73618a5ee2fc944ee071fe20733817db9e4f106dea13a15fa63","note":"Handover of a bicycle (demo)"},"ts":1792108800,"under":["4f7429774afaebb3d2e0b5a978a981fefbe7fe39b8cb6c78572cffe9c422ccc6"],"warrant":"0.2"},"sigs":[{"actor":"alice@demo.test","key":"031ac3e2271f1ae38d7fd4a0731ba318ac0a0bdecc1e68c9e1459b93837df406","sig":"1b1270a7db4aab02df989a507cc16407e4ab29ae4792926c5e80ee660e1dcc4791ce0dcc613a90931cf562c3a96ecaa7f291172b4ff19d63c7e8d2d3a6dc960a"}]}}}
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 1251 >>
+stream
+BT /F1 9 Tf 11 TL 40 800 Td
+(WARRANT-PDF/0 CONTRACT) '
+() '
+(Title: Handover of a bicycle \(demo\)) '
+() '
+(1. Alice hands over the bicycle shown in photo.png to Bob on 2026-10-16.) '
+(2. Bob confirms the condition shown in the photo, including the scratch on the frame.) '
+(3. The price is 100 EUR, paid in cash at handover.) '
+() '
+(Named parties: alice@demo.test, bob@demo.test) '
+() '
+(Attachments \(SHA-256 of the exact bytes\):) '
+(  photo.png  ab09e8aaa1c62b6c4e31a40e08a93f25a299bbe5f01456af04da877e96df2570) '
+() '
+(Signed records \(warrant\):) '
+(  propose by alice@demo.test at 2026-10-16T00:00:00Z) '
+(    record f76867f2b9a448f62ff271e2f99d791a58864b03899a3ce1a0884be6fe1a85f5) '
+(    key 031ac3e2271f1ae38d7fd4a0731ba318ac0a0bdecc1e68c9e1459b93837df406) '
+(  accept by bob@demo.test at 2026-10-16T00:00:01Z) '
+(    record 7c0e948bf8ca86cc445946fe6490260ce7eec779cc89faf581ab54e0569479ec) '
+(    key 880b95ee693cb4a37b695050bc5f3c779d84e7576b4ddfd0ab4f489ecf5c11ab) '
+() '
+(This page is a rendering. The signed content is the embedded) '
+(warrant bundle; `python3 -m warrant_pdf verify FILE --trust YOURS.json`) '
+(checks the signatures under your trust config and whether this page) '
+(matches a fresh rendering of what was signed.) '
+ET
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000015 00000 n 
+0000000098 00000 n 
+0000000155 00000 n 
+0000000223 00000 n 
+0000000281 00000 n 
+0000000388 00000 n 
+0000005619 00000 n 
+0000005745 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R >>
+startxref
+7048
+%%EOF

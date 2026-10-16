@@ -1,0 +1,33 @@
+{
+  "id": "WPDF-T2",
+  "profile": "warrant-pdf.contract.v1",
+  "adr": "docs/adr/0003-trust-comes-from-the-reader.md",
+  "statement": "The reader's warrant verifier MUST run at settlement grade, and any finding other than the warning `unadopted root` MUST refuse.",
+  "witnesses": [
+    "test_accept_signed_by_another_key_for_the_same_actor_refuses"
+  ],
+  "mutants": [
+    "base-grade",
+    "tolerate-all-warnings"
+  ],
+  "decisions": [
+    {
+      "date": "2026-10-16",
+      "because": "Initial statement.",
+      "statement_sha256": "264bb26afdc96810336c00d8868c2ac37a3007b6594a8289f6f81b160bc50ae4",
+      "previous_statement_sha256": null
+    },
+    {
+      "date": "2026-10-16",
+      "because": "The rule was strict from the first draft as a fail-closed default. The mutant 'tolerate-all-warnings' showed it is load-bearing, and why: an accept for bob@demo.test signed with Mallory's key verifies ok:true, errors:0 under warrant 0.10.0 settlement grade with Bob's key in the reader's trust config; the only signal is the WARN 'signature unbound: key 415960d5a615 claims actor bob@demo.test' (warrant SPEC §5.1 makes bound/unbound a report). Without this rule the profile would accept Mallory's signature as Bob's.",
+      "counterexample": {
+        "witness": "test_accept_signed_by_another_key_for_the_same_actor_refuses",
+        "mutant": "tolerate-all-warnings",
+        "observed": "VERIFIED: propose by alice@demo.test, accept by bob@demo.test",
+        "expected": "REFUSED WARRANT"
+      },
+      "statement_sha256": "264bb26afdc96810336c00d8868c2ac37a3007b6594a8289f6f81b160bc50ae4",
+      "previous_statement_sha256": "264bb26afdc96810336c00d8868c2ac37a3007b6594a8289f6f81b160bc50ae4"
+    }
+  ]
+}

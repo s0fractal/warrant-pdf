@@ -1,0 +1,20 @@
+{
+  "id": "WPDF-A1",
+  "profile": "warrant-pdf.contract.v1",
+  "adr": "docs/adr/0001-the-anchor-is-the-record.md",
+  "statement": "Verification MUST NOT depend on the bytes of the rendered pages: a file whose pages differ from the canonical rendering still verifies when its bundle does, and the difference is reported, not hidden.",
+  "witnesses": [
+    "test_re_rendered_elsewhere_still_verifies"
+  ],
+  "mutants": [
+    "display-strict-by-default"
+  ],
+  "decisions": [
+    {
+      "date": "2026-10-16",
+      "because": "Initial statement.",
+      "statement_sha256": "409dd9503afc8c5a6002c53a2f4bcbd4cb4106c1ef96198532e76ea8ba7cf442",
+      "previous_statement_sha256": null
+    }
+  ]
+}

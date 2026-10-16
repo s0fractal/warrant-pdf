@@ -1,0 +1,162 @@
+[
+ {
+  "id": "display-strict-by-default",
+  "statement": "WPDF-A1",
+  "file": "warrant_pdf/verify.py",
+  "find": "def verify(pdf, trust_config, cmd=\"warrant\", strict_display=False):",
+  "replace": "def verify(pdf, trust_config, cmd=\"warrant\", strict_display=True):",
+  "why": "a re-rendered file is refused although its signatures hold"
+ },
+ {
+  "id": "first-of-many-markers",
+  "statement": "WPDF-E1",
+  "file": "warrant_pdf/bundle.py",
+  "find": "    if len(starts) != 1:",
+  "replace": "    if len(starts) < 1:",
+  "why": "an appended second bundle is ignored"
+ },
+ {
+  "id": "no-bundle-digest",
+  "statement": "WPDF-E1",
+  "file": "warrant_pdf/bundle.py",
+  "find": "    if hashlib.sha256(data).hexdigest() != digest:",
+  "replace": "    if False:",
+  "why": "bundle bytes are not checked against the marker"
+ },
+ {
+  "id": "no-blob-name-check",
+  "statement": "WPDF-E2",
+  "file": "warrant_pdf/bundle.py",
+  "find": "        if hashlib.sha256(data).hexdigest() != name:",
+  "replace": "        if False:",
+  "why": "a blob may sit under another blob's name"
+ },
+ {
+  "id": "no-record-name-check",
+  "statement": "WPDF-E2",
+  "file": "warrant_pdf/verify.py",
+  "find": "            if wcli.warrant_id(cmd, rec[\"body\"], tmp) != name:",
+  "replace": "            if False:",
+  "why": "a record may sit under another record's name"
+ },
+ {
+  "id": "no-bare-bundle",
+  "statement": "WPDF-E3",
+  "file": "warrant_pdf/verify.py",
+  "find": "    bare = pdf.startswith(b'{\"blobs\":')",
+  "replace": "    bare = False",
+  "why": "a saved attachment can no longer be verified"
+ },
+ {
+  "id": "no-trust-required",
+  "statement": "WPDF-T1",
+  "file": "warrant_pdf/verify.py",
+  "find": "    if trust_config is None or not Path(trust_config).is_file():",
+  "replace": "    if False:",
+  "why": "verification proceeds without a reader trust config"
+ },
+ {
+  "id": "base-grade",
+  "statement": "WPDF-T2",
+  "file": "warrant_pdf/wcli.py",
+  "find": "\"verify\", \"--settlement\",",
+  "replace": "\"verify\",",
+  "why": "keys are not bound to actors at all"
+ },
+ {
+  "id": "tolerate-all-warnings",
+  "statement": "WPDF-T2",
+  "file": "warrant_pdf/verify.py",
+  "find": "f[\"message\"] != EXPECTED_WARNING or f[\"level\"] != \"WARN\"",
+  "replace": "f[\"level\"] != \"WARN\"",
+  "why": "any warrant warning is tolerated"
+ },
+ {
+  "id": "foreign-records-pass",
+  "statement": "WPDF-P1",
+  "file": "warrant_pdf/verify.py",
+  "find": "    if others:",
+  "replace": "    if False:",
+  "why": "records other than the propose and accepts are ignored"
+ },
+ {
+  "id": "many-proposes",
+  "statement": "WPDF-P1",
+  "file": "warrant_pdf/verify.py",
+  "find": "    if len(proposes) != 1:",
+  "replace": "    if not proposes:",
+  "why": "a second propose is not refused as such"
+ },
+ {
+  "id": "any-policy",
+  "statement": "WPDF-P1",
+  "file": "warrant_pdf/verify.py",
+  "find": "        if r[\"body\"].get(\"under\") != [PROFILE_BLOB_HASH]:",
+  "replace": "        if False:",
+  "why": "records filed under another policy are reused"
+ },
+ {
+  "id": "evidence-unchecked",
+  "statement": "WPDF-P1",
+  "file": "warrant_pdf/verify.py",
+  "find": "    if not required <= set(body[\"evidence\"]):",
+  "replace": "    if False:",
+  "why": "an attachment the propose never relied on is shown as signed"
+ },
+ {
+  "id": "any-prior",
+  "statement": "WPDF-P2",
+  "file": "warrant_pdf/verify.py",
+  "find": "        if b[\"prior\"] != [pid]:",
+  "replace": "        if False:",
+  "why": "an accept of something else counts"
+ },
+ {
+  "id": "any-subject",
+  "statement": "WPDF-P2",
+  "file": "warrant_pdf/verify.py",
+  "find": "        if b[\"subject\"] != body[\"subject\"]:",
+  "replace": "        if False:",
+  "why": "an accept may name another subject"
+ },
+ {
+  "id": "self-accept",
+  "statement": "WPDF-P2",
+  "file": "warrant_pdf/verify.py",
+  "find": "        if b[\"actor\"][\"id\"] == body[\"actor\"][\"id\"]:",
+  "replace": "        if False:",
+  "why": "the proposer accepts their own offer"
+ },
+ {
+  "id": "parties-unchecked",
+  "statement": "WPDF-P3",
+  "file": "warrant_pdf/verify.py",
+  "find": "    if missing:",
+  "replace": "    if False:",
+  "why": "a named party who never signed is not noticed"
+ },
+ {
+  "id": "no-accept-needed",
+  "statement": "WPDF-P3",
+  "file": "warrant_pdf/verify.py",
+  "find": "    if not accepts:",
+  "replace": "    if False:",
+  "why": "an offer nobody accepted counts as a contract"
+ },
+ {
+  "id": "always-match",
+  "statement": "WPDF-D1",
+  "file": "warrant_pdf/verify.py",
+  "find": "    display = \"MATCH\" if pdf_from(records, blobs) == pdf else \"DIFFERS\"",
+  "replace": "    display = \"MATCH\"",
+  "why": "an edited page is reported as the signed one"
+ },
+ {
+  "id": "render-not-deterministic",
+  "statement": "WPDF-D2",
+  "file": "warrant_pdf/render.py",
+  "find": "    out = bytearray(b\"%PDF-1.7\\n%\\xe2\\xe3\\xcf\\xd3\\n\")",
+  "replace": "    import time\n    out = bytearray(b\"%PDF-1.7\\n%%%d\\n\" % time.time_ns())",
+  "why": "the demo no longer reproduces"
+ }
+]

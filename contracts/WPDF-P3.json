@@ -1,0 +1,29 @@
+{
+  "id": "WPDF-P3",
+  "profile": "warrant-pdf.contract.v1",
+  "adr": "docs/adr/0002-two-parties-are-propose-and-accept.md",
+  "statement": "Every party the terms name MUST have filed the propose or an accept, and at least one accept MUST exist.",
+  "witnesses": [
+    "test_accept_removed_refuses",
+    "test_named_party_replaced_by_a_trusted_stranger_refuses",
+    "test_offer_without_any_accept_refuses"
+  ],
+  "mutants": [
+    "parties-unchecked",
+    "no-accept-needed"
+  ],
+  "decisions": [
+    {
+      "date": "2026-10-16",
+      "because": "Initial statement.",
+      "statement_sha256": "673f68719941bc938c4a275927b4057cdd3c3e291fdb2d5f9e3e5b4cc8dfc510",
+      "previous_statement_sha256": null
+    },
+    {
+      "date": "2026-10-16",
+      "because": "With only the accept-removed witness, removing the named-party rule was still refused (as PROFILE_NO_ACCEPT), so the rule had no witness of its own. Added a trusted stranger accepting in place of the named party; that case verifies without the rule.",
+      "statement_sha256": "673f68719941bc938c4a275927b4057cdd3c3e291fdb2d5f9e3e5b4cc8dfc510",
+      "previous_statement_sha256": "673f68719941bc938c4a275927b4057cdd3c3e291fdb2d5f9e3e5b4cc8dfc510"
+    }
+  ]
+}

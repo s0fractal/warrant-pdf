@@ -1,0 +1,26 @@
+{
+  "id": "WPDF-E3",
+  "profile": "warrant-pdf.contract.v1",
+  "adr": "docs/adr/0004-one-marked-bundle.md",
+  "statement": "A bundle saved on its own (the `warrant-bundle.json` attachment) MUST verify by the same rules, with no page comparison.",
+  "witnesses": [
+    "test_attachment_saved_from_a_viewer_verifies",
+    "test_bare_bundle_gets_the_same_checks"
+  ],
+  "mutants": [
+    "no-bare-bundle"
+  ],
+  "decisions": [
+    {
+      "date": "2026-10-16",
+      "because": "Measured: every qpdf 12.4.2 re-save (four modes) dropped the marker line and kept the warrant-bundle.json attachment byte for byte (docs/measurements/2026-10-16-resave.md). Without this statement a re-saved contract could not be verified at all.",
+      "counterexample": {
+        "witness": "test_attachment_saved_from_a_viewer_verifies",
+        "observed": "REFUSED BUNDLE_MISSING on every qpdf re-save",
+        "expected": "the bundle remains verifiable"
+      },
+      "statement_sha256": "9908d404dc1a22d1ec9c0248e43711a375d4ad15d3c8d577384c83990c4ed333",
+      "previous_statement_sha256": null
+    }
+  ]
+}

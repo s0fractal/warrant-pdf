@@ -1,0 +1,20 @@
+{
+  "id": "WPDF-D2",
+  "profile": "warrant-pdf.contract.v1",
+  "adr": "docs/adr/0005-the-page-is-checked-not-signed.md",
+  "statement": "The demo build MUST reproduce `demo/contract.pdf` and `demo/trust.json` byte for byte.",
+  "witnesses": [
+    "test_demo_rebuilds_byte_for_byte"
+  ],
+  "mutants": [
+    "render-not-deterministic"
+  ],
+  "decisions": [
+    {
+      "date": "2026-10-16",
+      "because": "Initial statement.",
+      "statement_sha256": "bca0ea3bc5eaacb11d6de370140949beb03aafb6ba292ceb5adb62028fd8d224",
+      "previous_statement_sha256": null
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "id": "WPDF-P2",
+  "profile": "warrant-pdf.contract.v1",
+  "adr": "docs/adr/0002-two-parties-are-propose-and-accept.md",
+  "statement": "Every accept MUST respond to exactly the propose (its prior is the propose alone), name the same subject, and be filed by an actor other than the proposer.",
+  "witnesses": [
+    "test_accept_naming_another_subject_refuses",
+    "test_accept_of_an_accept_refuses",
+    "test_self_accept_refuses",
+    "test_self_accept_with_no_named_parties_refuses"
+  ],
+  "mutants": [
+    "any-prior",
+    "any-subject",
+    "self-accept"
+  ],
+  "decisions": [
+    {
+      "date": "2026-10-16",
+      "because": "Initial statement.",
+      "statement_sha256": "d418b13c87a79d8d86a81909b4284f1ed26454f7dd0110ae48214412d79eb118",
+      "previous_statement_sha256": null
+    },
+    {
+      "date": "2026-10-16",
+      "because": "Counterexample to the first draft's witness: an accept whose prior names an offer left out of the bundle was expected to refuse as PROFILE_PRIOR; warrant refuses it first ('prior … not in store'). The profile rule is narrowed to what warrant does not check: an accept whose prior is another record in the bundle (an accept of an accept).",
+      "counterexample": {
+        "witness": "test_accept_of_an_offer_not_in_the_bundle_refuses",
+        "observed": "REFUSED WARRANT",
+        "expected (draft)": "REFUSED PROFILE_PRIOR"
+      },
+      "statement_sha256": "d418b13c87a79d8d86a81909b4284f1ed26454f7dd0110ae48214412d79eb118",
+      "previous_statement_sha256": "d418b13c87a79d8d86a81909b4284f1ed26454f7dd0110ae48214412d79eb118"
+    }
+  ]
+}
