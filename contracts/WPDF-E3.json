@@ -8,7 +8,8 @@
     "test_bare_bundle_gets_the_same_checks"
   ],
   "mutants": [
-    "no-bare-bundle"
+    "no-bare-bundle",
+    "js-no-bare-bundle"
   ],
   "decisions": [
     {

@@ -11,7 +11,8 @@
   "mutants": [
     "nan-accepted",
     "entries-unbounded",
-    "size-unbounded"
+    "size-unbounded",
+    "js-entries-unbounded"
   ],
   "decisions": [
     {

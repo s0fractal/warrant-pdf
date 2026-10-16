@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>warrant-pdf verifier</title>
+<style>
+  :root { --bg: #fbfaf7; --fg: #1d1c1a; --muted: #6b6760; --line: #dedad2; --ok: #1f6f43; --bad: #a3271c; --warn: #8a5a00; --card: #fff; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161513; --fg: #ece9e3; --muted: #a29d94; --line: #34312c; --ok: #6cc596; --bad: #f08878; --warn: #e3b25c; --card: #1e1d1a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  p.lead { color: var(--muted); margin: 0 0 24px; }
+  .inputs { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 560px) { .inputs { grid-template-columns: 1fr; } }
+  label.drop { display: block; border: 1.5px dashed var(--line); border-radius: 10px; padding: 16px; background: var(--card); cursor: pointer; min-height: 92px; }
+  label.drop.has { border-style: solid; border-color: var(--ok); }
+  label.drop b { display: block; }
+  label.drop span { color: var(--muted); font-size: 13px; word-break: break-all; }
+  input[type=file] { display: none; }
+  .row { display: flex; gap: 16px; align-items: center; margin: 16px 0; flex-wrap: wrap; }
+  button { font: inherit; padding: 8px 18px; border-radius: 8px; border: 1px solid var(--fg); background: var(--fg); color: var(--bg); cursor: pointer; }
+  button:disabled { opacity: .4; cursor: default; }
+  #verdict { font-weight: 600; font-size: 17px; margin: 20px 0 6px; }
+  #verdict.ok { color: var(--ok); } #verdict.bad { color: var(--bad); } #verdict.warn { color: var(--warn); }
+  #note { color: var(--muted); margin: 0 0 12px; }
+  pre { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; overflow-x: auto; font-size: 12.5px; white-space: pre-wrap; word-break: break-word; }
+  footer { color: var(--muted); font-size: 13px; margin-top: 32px; border-top: 1px solid var(--line); padding-top: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>warrant-pdf verifier</h1>
+  <p class="lead">Checks a contract PDF (or its <code>warrant-bundle.json</code> attachment) against
+    <em>your</em> trust config. Everything runs in this tab; nothing is uploaded.</p>
+  <div class="inputs">
+    <label class="drop" id="pdfDrop"><b>Contract</b><span id="pdfName">PDF or warrant-bundle.json</span>
+      <input type="file" id="pdf" accept=".pdf,.json,application/pdf,application/json"></label>
+    <label class="drop" id="trustDrop"><b>Your trust config</b><span id="trustName">trust.json: the keys you know</span>
+      <input type="file" id="trust" accept=".json,application/json"></label>
+  </div>
+  <div class="row">
+    <button id="go" disabled>Verify</button>
+    <label><input type="checkbox" id="strict"> refuse if the page differs from what was signed</label>
+  </div>
+  <div id="verdict"></div>
+  <p id="note"></p>
+  <pre id="text" hidden></pre>
+  <footer>Profile <code>warrant-pdf/0</code> · verifier <code>@s0fractal/warrant</code> 0.10.0 (Rust core, WebAssembly),
+    vendored and pinned by npm integrity. VERIFIED means: one bundle, every entry named by its hash, your warrant
+    verifier at settlement grade found nothing but <code>unadopted root</code>, and the profile rules hold. It does not
+    say who a key belongs to beyond your trust config, or that the photo shows what it claims.</footer>
+</main>
+<script type="module">
+  const $ = (id) => document.getElementById(id);
+  const state = {};
+  for (const [input, drop, name] of [["pdf", "pdfDrop", "pdfName"], ["trust", "trustDrop", "trustName"]]) {
+    const take = async (file) => {
+      state[input] = input === "pdf" ? await file.arrayBuffer() : await file.text();
+      $(name).textContent = `${file.name} (${file.size} bytes)`;
+      $(drop).classList.add("has");
+      $("go").disabled = !(state.pdf && state.trust !== undefined);
+    };
+    $(input).addEventListener("change", (e) => e.target.files[0] && take(e.target.files[0]));
+    $(drop).addEventListener("dragover", (e) => e.preventDefault());
+    $(drop).addEventListener("drop", (e) => { e.preventDefault(); e.dataTransfer.files[0] && take(e.dataTransfer.files[0]); });
+  }
+  const show = (cls, verdict, note, text) => {
+    $("verdict").className = cls; $("verdict").textContent = verdict; $("note").textContent = note;
+    $("text").hidden = !text; $("text").textContent = text || "";
+  };
+  $("go").addEventListener("click", () => {
+    $("go").disabled = true;
+    show("", "Verifying…", "", "");
+    const worker = new Worker("./worker.mjs", { type: "module" });
+    const timer = setTimeout(() => { worker.terminate(); show("bad", "No verdict", "The verifier did not finish in 12 s; it was stopped.", ""); $("go").disabled = false; }, 12000);
+    worker.onmessage = ({ data: r }) => {
+      clearTimeout(timer); worker.terminate(); $("go").disabled = false;
+      if (r.outcome === "REFUSED") return show("bad", `REFUSED ${r.code}`, r.detail, "");
+      if (r.outcome === "ERROR") return show("bad", "Verifier error", r.detail, "");
+      const who = r.signers.map(([d, a]) => `${d} by ${a}`).join(", ");
+      const page = { MATCH: "The page is exactly the rendering of what was signed.",
+        DIFFERS: "The page is NOT the rendering of what was signed (re-exported or edited). Read the signed text below, not the page.",
+        NO_PAGE: "A bare bundle was verified; there is no page to compare." }[r.display];
+      show(r.display === "DIFFERS" ? "warn" : "ok", `VERIFIED: ${who}`, `${page} Grade: ${r.grade}.`, r.text.join("\n"));
+    };
+    worker.onerror = (e) => { clearTimeout(timer); worker.terminate(); show("bad", "Verifier error", e.message, ""); $("go").disabled = false; };
+    worker.postMessage({ file: state.pdf, trust: state.trust, strict: $("strict").checked });
+  });
+</script>
+</body>
+</html>

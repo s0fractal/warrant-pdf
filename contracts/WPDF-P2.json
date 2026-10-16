@@ -12,7 +12,10 @@
   "mutants": [
     "any-prior",
     "any-subject",
-    "self-accept"
+    "self-accept",
+    "js-any-prior",
+    "js-any-subject",
+    "js-self-accept"
   ],
   "decisions": [
     {

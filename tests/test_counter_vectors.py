@@ -16,9 +16,50 @@ sys.path.insert(0, str(ROOT / "demo"))
 import build_demo  # noqa: E402
 from warrant_pdf import bundle, make, render, wcli  # noqa: E402
 from warrant_pdf.profile import PROFILE_BLOB, Refusal, encode_terms  # noqa: E402
-from warrant_pdf.verify import verify  # noqa: E402
+from warrant_pdf.verify import verify as py_verify  # noqa: E402
+
+import os  # noqa: E402
+import subprocess  # noqa: E402
 
 CMD = "warrant"
+NODE = shutil.which("node")
+if os.environ.get("WPDF_REQUIRE_JS") == "1" and not NODE:
+    raise SystemExit("WPDF_REQUIRE_JS=1 but node is not on PATH")
+
+
+def js_outcome(pdf, trust, strict_display):
+    """The JavaScript implementation (web/profile.mjs on warrant's Rust core in WASM)."""
+    with tempfile.TemporaryDirectory() as tmp:
+        f = Path(tmp) / "input"
+        f.write_bytes(pdf)
+        args = [NODE, str(ROOT / "web" / "cli.mjs"), str(f), str(trust) if trust is not None else "-"]
+        flag = {None: [], True: ["--strict-display"], False: ["--no-strict-display"]}[strict_display]
+        out = subprocess.run(args + flag,
+                             capture_output=True, text=True)
+    if out.returncode != 0:
+        raise AssertionError(f"JS verifier crashed: {out.stderr.strip()[-400:]}")
+    d = json.loads(out.stdout)
+    if d["outcome"] == "REFUSED":
+        return ("REFUSED", d["code"])
+    return ("VERIFIED", d["display"], [tuple(x) for x in d["signers"]], d["text"], d["grade"])
+
+
+def verify(pdf, trust, cmd, **kw):
+    """Both implementations of the profile must agree on every input (parity).
+    The JS side always uses warrant's WASM core; it is skipped only when the test
+    deliberately breaks the Python side's verifier command."""
+    try:
+        r = py_verify(pdf, trust, cmd, **kw)  # defaults stay the implementation's own
+        py, err = ("VERIFIED", r.display, r.signers, r.text, r.grade), None
+    except Refusal as e:
+        py, err = ("REFUSED", e.code), e
+    if NODE and cmd == CMD:
+        js = js_outcome(pdf, trust, kw.get("strict_display"))
+        if js != py:
+            raise AssertionError(f"Python and JS disagree:\n  python: {py[:2]}\n  js:     {js[:2]}")
+    if err:
+        raise err
+    return r
 PDF = (ROOT / "demo" / "contract.pdf").read_bytes()
 TRUST = ROOT / "demo" / "trust.json"
 ALICE, BOB = list(build_demo.PARTIES)

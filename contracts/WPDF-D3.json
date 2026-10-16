@@ -7,7 +7,8 @@
     "test_largest_timestamp_warrant_admits_verifies"
   ],
   "mutants": [
-    "iso-partial"
+    "iso-partial",
+    "js-iso-partial"
   ],
   "decisions": [
     {

@@ -13,7 +13,10 @@
     "foreign-records-pass",
     "many-proposes",
     "any-policy",
-    "evidence-unchecked"
+    "evidence-unchecked",
+    "js-foreign-records-pass",
+    "js-any-policy",
+    "js-evidence-unchecked"
   ],
   "decisions": [
     {

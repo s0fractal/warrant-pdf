@@ -18,6 +18,15 @@ pip install warrant-verify==0.10.0        # the reader's verifier; warrant-pdf c
 python3 -m warrant_pdf verify demo/contract.pdf --trust demo/trust.json
 ```
 
+Or in a browser, offline, with nothing uploaded. The verifier there is warrant's
+Rust core compiled to WebAssembly, vendored and pinned
+([ADR-0006](docs/adr/0006-two-implementations-one-verdict.md)):
+
+```sh
+python3 -m http.server 8765    # then open http://localhost:8765/web/ and drop in
+                               # demo/contract.pdf and demo/trust.json
+```
+
 ```
 VERIFIED propose by alice@demo.test, accept by bob@demo.test
 
@@ -63,9 +72,13 @@ It does **not** mean:
   counterexamples that forced it.
 - **[tests/test_counter_vectors.py](tests/test_counter_vectors.py)**: each test
   is one attack or accident and the outcome it must produce.
+- **Two implementations**: Python ([warrant_pdf/](warrant_pdf/), calling the
+  Python warrant CLI) and JavaScript ([web/profile.mjs](web/profile.mjs), calling
+  warrant's Rust core in WASM). Every counter-vector runs through both, and the
+  outcomes must be identical, down to the signed text.
 - **Mutants** ([tools/mutants.json](tools/mutants.json)): each removes or
-  weakens one rule. A mutant counts as killed only if a witness *of its own
-  statement* fails. Any other failing test does not count.
+  weakens one rule, in either implementation. A mutant counts as killed only if
+  a witness *of its own statement* fails. Any other failing test does not count.
 
 ```sh
 sh scripts/local-ci.sh        # demo reproduces, contracts check, tests, mutants
@@ -81,6 +94,14 @@ sh scripts/local-ci.sh        # demo reproduces, contracts check, tests, mutants
 - **A qpdf re-save drops both the marker line and bytes after `%%EOF`; the
   attachment survives.** Hence the saved attachment is itself verifiable
   ([measurement](docs/measurements/2026-10-16-resave.md), [WPDF-E3](contracts/WPDF-E3.json)).
+- **Writing the second implementation broke the first, usefully.** Several gaps
+  surfaced before any JavaScript ran:
+  - a `ts` that warrant admits crashed the Python verifier;
+  - Python admitted bundles the browser verifier cannot;
+  - a missing verifier gave a traceback instead of a refusal.
+
+  The parity hook then hid a default from its own mutants. All of these are recorded
+  as counterexamples in the [contracts](contracts/).
 
 ## Limits
 
@@ -90,8 +111,8 @@ sh scripts/local-ci.sh        # demo reproduces, contracts check, tests, mutants
   prints the exact text.
 - After acceptance there is no lifecycle: a `supersede` or `reject` in the bundle
   refuses.
-- One verifier path today (Python). A browser verifier on warrant's WASM package
-  is the next step.
+- The browser page needs a static web server, because module workers do not
+  load from `file://`.
 
 See [docs/COMPARISON.md](docs/COMPARISON.md) for how this relates to other
 self-contained signed-PDF designs.

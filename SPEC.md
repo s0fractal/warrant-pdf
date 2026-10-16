@@ -32,3 +32,8 @@ contract (witness tests, mutants, history).
 - **WPDF-D1** ([contract](contracts/WPDF-D1.json)). A verifier MUST re-render the bundle with the profile's renderer, MUST report whether the file equals that rendering, and MUST print the signed text; under `--strict-display` a difference MUST refuse.
 - **WPDF-D2** ([contract](contracts/WPDF-D2.json)). The demo build MUST reproduce `demo/contract.pdf` and `demo/trust.json` byte for byte.
 - **WPDF-D3** ([contract](contracts/WPDF-D3.json)). The canonical text MUST be defined for every value warrant admits: a `ts` after 9999-12-31T23:59:59Z is written `unix <ts>`, never an error.
+
+## [ADR-0006. Two implementations, one verdict](docs/adr/0006-two-implementations-one-verdict.md)
+
+- **WPDF-I1** ([contract](contracts/WPDF-I1.json)). The Python and JavaScript implementations MUST produce the same outcome — the refusal code, or the display result, signers, signed text and grade — for every input in the counter-vector suite.
+- **WPDF-I2** ([contract](contracts/WPDF-I2.json)). The browser verifier MUST run the vendored `@s0fractal/warrant` 0.10.0 only if every vendored file matches the pinned manifest and the embedded WASM matches the package's `build.json`.

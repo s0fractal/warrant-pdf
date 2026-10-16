@@ -10,7 +10,9 @@
   ],
   "mutants": [
     "parties-unchecked",
-    "no-accept-needed"
+    "no-accept-needed",
+    "js-parties-unchecked",
+    "js-no-accept-needed"
   ],
   "decisions": [
     {

@@ -1,9 +1,12 @@
 #!/bin/sh
-# Everything CI runs, in the same order. Needs python3 >= 3.11 and the `warrant`
-# command (pip install warrant-verify==0.10.0). Set MUTATE=0 to skip mutants.
+# Everything CI runs, in the same order. Needs python3 >= 3.11, node >= 22, and the
+# `warrant` command (pip install warrant-verify==0.10.0). MUTATE=0 skips mutants;
+# NPM=1 also compares the vendored verifier with the tarball npm serves.
 set -eu
 cd "$(dirname "$0")/.."
-echo "== warrant: $(command -v warrant)"
+export WPDF_REQUIRE_JS=1
+echo "== warrant: $(command -v warrant); node: $(node --version)"
+python3 tools/vendor_check.py ${NPM:+--against-npm}
 python3 demo/build_demo.py --check
 python3 tools/contracts.py check
 python3 -m unittest discover -s tests

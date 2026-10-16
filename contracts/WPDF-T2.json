@@ -11,7 +11,8 @@
   "mutants": [
     "base-grade",
     "tolerate-all-warnings",
-    "verifier-failure-escapes"
+    "verifier-failure-escapes",
+    "js-tolerate-all-warnings"
   ],
   "decisions": [
     {

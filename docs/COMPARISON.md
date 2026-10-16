@@ -34,7 +34,7 @@ document makes no legal claim of any kind.
 ## The honest summary
 
 The evidence core of a self-contained two-party signed PDF fits a profile over
-warrant. The profile adds five ADRs and under 500 lines of Python, and needs no new
+warrant. The profile adds six ADRs and about 500 lines of Python (with a 373-line JavaScript twin), and needs no new
 cryptography. Pakto's own contribution lies outside that core:
 - hardware-backed keys and attestation;
 - the offline optical channel;
