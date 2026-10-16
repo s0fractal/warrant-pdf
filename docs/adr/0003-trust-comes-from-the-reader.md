@@ -47,10 +47,21 @@ exists as a separate, narrow one.
   makes bound signatures required"). A consumer that reads only `ok` accepts Mallory's
   signature as Bob's. WPDF-T2 refuses on that warning. Found while writing this
   profile; see the WPDF-T2 contract history.
+- **Over-refusal (known limitation).** Signatures sit outside the WarrantID, so
+  anyone holding a copy can append a co-signature to a record. warrant reports such
+  a co-signature as a WARN and excludes it, by design. Because WPDF-T2 refuses on
+  every warning except one, a junk co-signature, even a cryptographically invalid
+  one claiming an unrelated actor, makes the whole contract refuse. This is fail
+  closed, and someone who controls a copy can corrupt it anyway, but it is broader
+  than the rule needs. A narrower rule ("refuse when the record's own actor has no
+  bound signature") needs either parsing warrant's message text, as the sibling
+  `oaip` does, or a verifier option. The latter is proposed to warrant as WRT-018.
+  Pinned by `test_appended_junk_cosignature_refuses_today`.
 - The reader has to obtain keys somewhere. This repository does not solve key
   distribution; it refuses to pretend the document can.
 
 ## Counter-vectors
 
 `test_without_reader_trust_refuses`, `test_counterparty_not_in_reader_trust_refuses`,
-`test_accept_signed_by_another_key_for_the_same_actor_refuses`, `test_unavailable_verifier_refuses`.
+`test_accept_signed_by_another_key_for_the_same_actor_refuses`, `test_unavailable_verifier_refuses`,
+`test_appended_junk_cosignature_refuses_today` (pins a known limitation).
