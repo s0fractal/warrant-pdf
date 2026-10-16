@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-export function verify_store(input: string, trust_config?: string | null): string;
+export function verify_store(input: string, trust_config?: string | null, require_bound?: boolean | null): string;
 export function record_id(raw_hex: string): string;
 export function run_check(input: string, check: string): string;
 
@@ -8,9 +8,9 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly verify_store: (a: number, b: number, c: number, d: number) => [number, number, number, number];
   readonly record_id: (a: number, b: number) => [number, number, number, number];
   readonly run_check: (a: number, b: number, c: number, d: number) => [number, number, number, number];
+  readonly verify_store: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
   readonly __wbindgen_export_0: WebAssembly.Table;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;

@@ -23,6 +23,11 @@ export interface CheckResult {
 /** Explicit external trust selects settlement grade; omission selects base. */
 export interface VerifyOptions {
     trust?: string;
+    /**
+     * WRT-018: a record whose own actor has no signature by a key bound in `trust`
+     * is an ERR. Co-signatures are unaffected. Requires `trust`; throws without it.
+     */
+    requireBound?: boolean;
 }
 /** WASM limits apply in every host, including Node and Deno. No time limit here. */
 export declare const LIMITS: Readonly<{

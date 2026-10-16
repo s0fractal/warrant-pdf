@@ -1,7 +1,7 @@
 // node web/cli.mjs FILE TRUST.json [--strict-display | --no-strict-display]
 // Prints one JSON outcome. Used by the parity hook in tests/test_counter_vectors.py.
 import { readFileSync } from "node:fs";
-import { verifyStore, recordId } from "./vendor/warrant-0.10.0/mod.js";
+import { verifyStore, recordId } from "./vendor/warrant-0.11.0/mod.js";
 import { verify, Refusal } from "./profile.mjs";
 
 const [file, trustPath, ...rest] = process.argv.slice(2);

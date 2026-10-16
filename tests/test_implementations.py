@@ -22,7 +22,7 @@ class Implementations(unittest.TestCase):
         self.assertIsNotNone(cv.NODE, "node not found; the parity hook would be skipped")
         r = py_verify(cv.PDF, cv.TRUST, cv.CMD)
         js = cv.js_outcome(cv.PDF, cv.TRUST, None)
-        self.assertEqual(js, ("VERIFIED", r.display, r.signers, r.text, r.grade))
+        self.assertEqual(js, ("VERIFIED", r.display, r.signers, r.text, r.grade, r.warnings))
         self.assertEqual(js[1], "MATCH")
 
     def test_vendored_verifier_matches_its_pin(self):

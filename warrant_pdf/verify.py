@@ -10,8 +10,8 @@ from pathlib import Path
 from . import bundle, wcli
 from .profile import PROFILE_BLOB_HASH, Refusal, canonical_text, parse_terms
 
-# The one warrant finding this profile expects: the propose is a root nobody
-# adopted, because a two-party contract has no genesis (ADR-0003).
+# Expected, so not shown: the propose is a root nobody adopted, because a
+# two-party contract has no genesis (ADR-0003).
 EXPECTED_WARNING = "unadopted root"
 
 
@@ -48,6 +48,11 @@ def arrange(records, blobs):
     required = {terms_hash} | {a["sha256"] for a in terms["attachments"]}
     if not required <= set(body["evidence"]):
         raise Refusal("PROFILE_EVIDENCE", "the propose evidence does not list the terms and every attachment")
+    absent = [a["name"] for a in terms["attachments"] if a["sha256"] not in blobs]
+    if absent:
+        # warrant reports an unresolvable evidence blob as a WARN (THREAT-MODEL A5);
+        # a contract whose signed photo is missing is not shown as signed.
+        raise Refusal("PROFILE_ATTACHMENT_MISSING", f"attachment {absent[0]} is not in the bundle")
     for w, r in accepts:
         b = r["body"]
         if b["prior"] != [pid]:
@@ -91,10 +96,15 @@ def verify(pdf, trust_config, cmd="warrant", strict_display=False):
         report = _run_warrant(cmd, records, blobs, trust_config)
     except (wcli.WarrantError, OSError) as e:
         raise Refusal("WARRANT", f"the reader's verifier produced no report: {e}")
-    unexpected = [f for f in report["findings"] if f["message"] != EXPECTED_WARNING or f["level"] != "WARN"]
-    if not report["ok"] or report["errors"] or unexpected:
-        f = (unexpected or report["findings"] or [{"message": "not ok"}])[0]
+    # WPDF-T2: with --require-bound, every record's own actor signed with a bound key
+    # or warrant reported an ERR. Warnings (an excluded co-signature, say) do not
+    # refuse; they are shown to the reader.
+    errors = [f for f in report["findings"] if f["level"] != "WARN"]
+    if not report["ok"] or report["errors"] or errors:
+        f = (errors or [{"message": "not ok"}])[0]
         raise Refusal("WARRANT", f"{f.get('level', '')} {f.get('subject', '')[:16]} {f['message']}".strip())
+    warnings = [f"{f['subject'][:12]} {f['message']}" for f in report["findings"]
+                if f["message"] != EXPECTED_WARNING]
     terms, propose, accepts = arrange(records, blobs)
     from .make import pdf_from
     if bare:
@@ -104,4 +114,4 @@ def verify(pdf, trust_config, cmd="warrant", strict_display=False):
     if display == "DIFFERS" and strict_display:
         raise Refusal("DISPLAY_DIFFERS", "the file is not the canonical rendering of what was signed")
     signers = [(r["body"]["decision"], r["body"]["actor"]["id"]) for _, r in [propose] + accepts]
-    return Result(display, canonical_text(terms, propose, accepts), signers, report["grade"])
+    return Result(display, canonical_text(terms, propose, accepts), signers, report["grade"], warnings)

@@ -27,6 +27,8 @@ def main(argv=None):
         print(f"REFUSED {e.code}: {e.detail}")
         return 1
     print("VERIFIED " + ", ".join(f"{d} by {a}" for d, a in r.signers))
+    for w in r.warnings:
+        print(f"WARNING (not fatal) {w}")
     if r.display == "NO_PAGE":
         print("NO PAGE: a bare bundle was verified; the signed text follows.")
     if r.display == "DIFFERS":

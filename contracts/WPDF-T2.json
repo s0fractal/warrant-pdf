@@ -2,18 +2,21 @@
   "id": "WPDF-T2",
   "profile": "warrant-pdf.contract.v1",
   "adr": "docs/adr/0003-trust-comes-from-the-reader.md",
-  "statement": "The reader's warrant verifier MUST run at settlement grade; any finding other than the warning `unadopted root`, and a verifier that produces no report, MUST refuse.",
+  "statement": "The reader's warrant verifier MUST run at settlement grade with the required-binding option, so that a record whose own actor has no signature by a key the reader's trust config binds is an error; any `ERR`, and a verifier that produces no report, MUST refuse, while warnings are shown to the reader and do not refuse.",
   "witnesses": [
     "test_accept_signed_by_another_key_for_the_same_actor_refuses",
-    "test_appended_junk_cosignature_refuses_today",
+    "test_appended_junk_cosignature_is_excluded_not_fatal",
     "test_unavailable_verifier_refuses",
+    "test_valid_cosignature_by_an_unbound_key_is_shown_not_fatal",
     "test_verification_ran_at_settlement_grade"
   ],
   "mutants": [
     "base-grade",
-    "tolerate-all-warnings",
     "verifier-failure-escapes",
-    "js-tolerate-all-warnings"
+    "no-require-bound",
+    "warnings-fatal",
+    "js-no-require-bound",
+    "js-warnings-fatal"
   ],
   "decisions": [
     {
@@ -67,6 +70,17 @@
       },
       "statement_sha256": "0e4e7b6b2d25c043ee5ec649988d596beb9c5f9a1dfc32c36743319dedabb40d",
       "previous_statement_sha256": "0e4e7b6b2d25c043ee5ec649988d596beb9c5f9a1dfc32c36743319dedabb40d"
+    },
+    {
+      "date": "2026-10-16",
+      "because": "warrant 0.11.0 shipped --require-bound (WRT-018, proposed from this repository after the measurements in this history). The statement moves from 'refuse every warning but unadopted root' to 'require the actor's binding; refuse on ERR; show warnings'. The pinned limitation (8b21a6e) is resolved: a junk or unbound co-signature is excluded and shown.",
+      "statement_sha256": "96713a18abf225f631bc6b4f28e82af4be964d9feec01d35ea454fefcd822bc8",
+      "previous_statement_sha256": "0e4e7b6b2d25c043ee5ec649988d596beb9c5f9a1dfc32c36743319dedabb40d",
+      "counterexample": {
+        "witness": "test_appended_junk_cosignature_is_excluded_not_fatal",
+        "observed (0.10.0, previous statement)": "REFUSED WARRANT over an invalid co-signature claiming carol@demo.test",
+        "expected": "VERIFIED, the co-signature shown as a warning"
+      }
     }
   ]
 }

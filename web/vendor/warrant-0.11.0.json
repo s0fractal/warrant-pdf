@@ -1,0 +1,15 @@
+{
+  "package": "@s0fractal/warrant",
+  "version": "0.11.0",
+  "npm_integrity": "sha512-NWu9TcYjPBm6v5/M9FU2YKaf5x0MRkjcRj0MqVvydrzAxLuvLcqG90LAouuh7xdGZqn8nhbliu6h8WNZJURTAw==",
+  "files": {
+    "LICENSE": "5b88add1ebf6dd014eb515f4d8ee9c535a15e471b28b2d993109275cf456c13f",
+    "generated/build.json": "b8a49e6e6d34d348f6685e39e6f82b474db2fd57b6dc360c714a0255d432e277",
+    "generated/bytes.d.ts": "1e87909b6119b6627c9c3ced6a2f541f33c86376ec8978a1845e16518f27b108",
+    "generated/bytes.js": "c7418d8bb6c8a045b53c491468b297aad7bddd7c4eda8f0392cbd7fd27191164",
+    "generated/warrant_browser.d.ts": "64159800c9b260a39982a59162e24567f921916b95b757200824faaa9cd95822",
+    "generated/warrant_browser.js": "01bcbf9fe615a80da8314d8d4d14fd8ae5e81638653ab7b1f2885fda95c3e178",
+    "mod.d.ts": "d5ca8810d66e9dc1102d6d0ce0257e6cb906178309c6ed353b1fb516dfb08427",
+    "mod.js": "21c86e8e6f7ab9816ffa58baac0c01a6b0f23a07f14ab03c5ee9e3c7619c0ad6"
+  }
+}

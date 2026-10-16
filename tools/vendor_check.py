@@ -18,10 +18,10 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PACKAGE, VERSION = "@s0fractal/warrant", "0.10.0"
+PACKAGE, VERSION = "@s0fractal/warrant", "0.11.0"
 VENDOR = ROOT / "web" / "vendor" / f"warrant-{VERSION}"
 MANIFEST = ROOT / "web" / "vendor" / f"warrant-{VERSION}.json"
-INTEGRITY = "sha512-/gt9iH6c7JlW+WZ8UffiDaVb45qjOxhjH+YVJ1ISID148r+5x9r+3mMBOrohl7aTM8MhoYTyBC9nOTvXUu/+1A=="
+INTEGRITY = "sha512-NWu9TcYjPBm6v5/M9FU2YKaf5x0MRkjcRj0MqVvydrzAxLuvLcqG90LAouuh7xdGZqn8nhbliu6h8WNZJURTAw=="
 # Tarball path -> vendored path. The package's README and package.json are not needed to run.
 LAYOUT = {"package/LICENSE": "LICENSE"} | {
     f"package/dist/{p}": p for p in ("mod.js", "mod.d.ts", "generated/build.json", "generated/bytes.js",

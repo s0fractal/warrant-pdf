@@ -26,7 +26,7 @@ count as a contract.
 
 ## Normative
 
-- **WPDF-P1.** A bundle MUST hold exactly one propose and otherwise only accepts; every record MUST be filed under exactly the profile blob; the propose subject MUST name the terms blob, and its evidence MUST list the terms and every attachment the terms name.
+- **WPDF-P1.** A bundle MUST hold exactly one propose and otherwise only accepts; every record MUST be filed under exactly the profile blob; the propose subject MUST name the terms blob, its evidence MUST list the terms and every attachment the terms name, and the bytes of every such attachment MUST be in the bundle.
 - **WPDF-P2.** Every accept MUST respond to exactly the propose (its prior is the propose alone), name the same subject, and be filed by an actor other than the proposer.
 - **WPDF-P3.** Every party the terms name MUST have filed the propose or an accept, and at least one accept MUST exist.
 
@@ -55,4 +55,4 @@ count as a contract.
 `test_accept_of_an_offer_not_in_the_bundle_refuses`, `test_accept_naming_another_subject_refuses`,
 `test_named_party_replaced_by_a_trusted_stranger_refuses`, `test_offer_without_any_accept_refuses`,
 `test_second_propose_refuses`, `test_foreign_record_refuses`, `test_attachment_not_in_evidence_refuses`,
-`test_filed_under_another_policy_refuses`.
+`test_filed_under_another_policy_refuses`, `test_photo_swapped_and_renamed_refuses`.

@@ -2,11 +2,12 @@
   "id": "WPDF-P1",
   "profile": "warrant-pdf.contract.v1",
   "adr": "docs/adr/0002-two-parties-are-propose-and-accept.md",
-  "statement": "A bundle MUST hold exactly one propose and otherwise only accepts; every record MUST be filed under exactly the profile blob; the propose subject MUST name the terms blob, and its evidence MUST list the terms and every attachment the terms name.",
+  "statement": "A bundle MUST hold exactly one propose and otherwise only accepts; every record MUST be filed under exactly the profile blob; the propose subject MUST name the terms blob, its evidence MUST list the terms and every attachment the terms name, and the bytes of every such attachment MUST be in the bundle.",
   "witnesses": [
     "test_attachment_not_in_evidence_refuses",
     "test_filed_under_another_policy_refuses",
     "test_foreign_record_refuses",
+    "test_photo_swapped_and_renamed_refuses",
     "test_second_propose_refuses"
   ],
   "mutants": [
@@ -16,7 +17,9 @@
     "evidence-unchecked",
     "js-foreign-records-pass",
     "js-any-policy",
-    "js-evidence-unchecked"
+    "js-evidence-unchecked",
+    "attachment-bytes-unchecked",
+    "js-attachment-bytes-unchecked"
   ],
   "decisions": [
     {
@@ -24,6 +27,17 @@
       "because": "Initial statement.",
       "statement_sha256": "1ae15657bdff6b6aec548034c1da6ccaf4a8029a965956a88e4b10a021233b16",
       "previous_statement_sha256": null
+    },
+    {
+      "date": "2026-10-16",
+      "because": "Relaxing WPDF-T2 exposed a rule that had held only by accident: warrant reports an unresolvable evidence blob as a WARN (THREAT-MODEL A5), so a contract whose signed photo was replaced by another one (under its own correct name) verified once warnings stopped refusing. The statement now requires the bytes of every attachment in the bundle. Every other warrant warning was reviewed: own-signature failures become ERR under --require-bound; ts order, ski verdict, missing policy blob and prose-only reject are harmless here or already refused.",
+      "statement_sha256": "8314685a93a95424e476aade16f3c92fe07eb0b66d1574023397a8612f374948",
+      "previous_statement_sha256": "1ae15657bdff6b6aec548034c1da6ccaf4a8029a965956a88e4b10a021233b16",
+      "counterexample": {
+        "witness": "test_photo_swapped_and_renamed_refuses",
+        "observed": "VERIFIED (warning: unresolved blob) with --require-bound and non-fatal warnings, before this statement",
+        "expected": "REFUSED PROFILE_ATTACHMENT_MISSING"
+      }
     }
   ]
 }

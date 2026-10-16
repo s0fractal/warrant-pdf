@@ -32,9 +32,10 @@ def warrant_id(cmd, body, workdir):
 
 
 def verify_store(cmd, store, trust_config):
-    """Settlement-grade verification under the reader's trust config."""
+    """Settlement grade under the reader's trust config, requiring each record's own
+    actor to be bound (warrant >= 0.11.0, WRT-018)."""
     code, out, err = run(cmd, ["--store", str(store), "verify", "--settlement",
-                               "--trust-config", str(trust_config), "--json"])
+                               "--trust-config", str(trust_config), "--require-bound", "--json"])
     try:
         report = json.loads(out)
     except json.JSONDecodeError:

@@ -64,14 +64,6 @@
   "why": "keys are not bound to actors at all"
  },
  {
-  "id": "tolerate-all-warnings",
-  "statement": "WPDF-T2",
-  "file": "warrant_pdf/verify.py",
-  "find": "f[\"message\"] != EXPECTED_WARNING or f[\"level\"] != \"WARN\"",
-  "replace": "f[\"level\"] != \"WARN\"",
-  "why": "any warrant warning is tolerated"
- },
- {
   "id": "foreign-records-pass",
   "statement": "WPDF-P1",
   "file": "warrant_pdf/verify.py",
@@ -264,14 +256,6 @@
   "why": "JS verifies without a reader trust config"
  },
  {
-  "id": "js-tolerate-all-warnings",
-  "statement": "WPDF-T2",
-  "file": "web/profile.mjs",
-  "find": "f.message !== EXPECTED_WARNING || f.level !== \"WARN\"",
-  "replace": "f.level !== \"WARN\"",
-  "why": "JS tolerates any warning"
- },
- {
   "id": "js-foreign-records-pass",
   "statement": "WPDF-P1",
   "file": "web/profile.mjs",
@@ -374,5 +358,53 @@
   "find": "    return sha(wasm) == build[\"wasmSha256\"] and build[\"packageVersion\"] == VERSION and build[\"workingTree\"] == \"clean\"",
   "replace": "    return True",
   "why": "a swapped WASM passes when the manifest was rewritten"
+ },
+ {
+  "id": "no-require-bound",
+  "statement": "WPDF-T2",
+  "file": "warrant_pdf/wcli.py",
+  "find": "\"--trust-config\", str(trust_config), \"--require-bound\", \"--json\"]",
+  "replace": "\"--trust-config\", str(trust_config), \"--json\"]",
+  "why": "Mallory's key for Bob verifies again (an unbound actor is only a warning)"
+ },
+ {
+  "id": "warnings-fatal",
+  "statement": "WPDF-T2",
+  "file": "warrant_pdf/verify.py",
+  "find": "    errors = [f for f in report[\"findings\"] if f[\"level\"] != \"WARN\"]",
+  "replace": "    errors = [f for f in report[\"findings\"] if f[\"message\"] != EXPECTED_WARNING]",
+  "why": "a junk co-signature refuses the contract again"
+ },
+ {
+  "id": "js-no-require-bound",
+  "statement": "WPDF-T2",
+  "file": "web/profile.mjs",
+  "find": "report = warrant.verifyStore(files, { trust, requireBound: true });",
+  "replace": "report = warrant.verifyStore(files, { trust });",
+  "why": "JS accepts Mallory's key for Bob"
+ },
+ {
+  "id": "js-warnings-fatal",
+  "statement": "WPDF-T2",
+  "file": "web/profile.mjs",
+  "find": "  const errors = report.findings.filter((f) => f.level !== \"WARN\");",
+  "replace": "  const errors = report.findings.filter((f) => f.message !== EXPECTED_WARNING);",
+  "why": "JS refuses over a junk co-signature"
+ },
+ {
+  "id": "attachment-bytes-unchecked",
+  "statement": "WPDF-P1",
+  "file": "warrant_pdf/verify.py",
+  "find": "    if absent:",
+  "replace": "    if False:",
+  "why": "a contract whose signed photo is missing verifies"
+ },
+ {
+  "id": "js-attachment-bytes-unchecked",
+  "statement": "WPDF-P1",
+  "file": "web/profile.mjs",
+  "find": "  if (absent.length) throw",
+  "replace": "  if (false) throw",
+  "why": "JS verifies a contract whose signed photo is missing"
  }
 ]

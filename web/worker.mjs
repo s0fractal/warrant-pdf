@@ -1,6 +1,6 @@
 // Runs one verification off the page's thread. The page terminates this worker
 // on timeout, as @s0fractal/warrant recommends for untrusted input.
-import { verifyStore, recordId } from "./vendor/warrant-0.10.0/mod.js";
+import { verifyStore, recordId } from "./vendor/warrant-0.11.0/mod.js";
 import { verify, Refusal } from "./profile.mjs";
 
 self.onmessage = async ({ data }) => {

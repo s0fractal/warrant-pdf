@@ -21,7 +21,7 @@ can be made to disagree.
   outcomes must be equal: refusal code, or display, signers, the full signed text and
   the reported grade. `WPDF_REQUIRE_JS=1` (set by local CI and CI) makes a missing
   `node` an error, not a skip.
-- The browser runs a vendored copy of `@s0fractal/warrant` 0.10.0. It is pinned by
+- The browser runs a vendored copy of `@s0fractal/warrant` 0.11.0. It is pinned by
   the npm registry's sha512 integrity and by SHA-256 per file, and its embedded WASM
   is checked against the package's `build.json`. CI compares the copy with the
   tarball npm serves.
@@ -31,7 +31,7 @@ can be made to disagree.
 ## Normative
 
 - **WPDF-I1.** The Python and JavaScript implementations MUST produce the same outcome — the refusal code, or the display result, signers, signed text and grade — for every input in the counter-vector suite.
-- **WPDF-I2.** The browser verifier MUST run the vendored `@s0fractal/warrant` 0.10.0 only if every vendored file matches the pinned manifest and the embedded WASM matches the package's `build.json`.
+- **WPDF-I2.** The browser verifier MUST run the vendored `@s0fractal/warrant` 0.11.0 only if every vendored file matches the pinned manifest and the embedded WASM matches the package's `build.json`.
 
 ## Considered
 
