@@ -2,13 +2,16 @@
   "id": "WPDF-T2",
   "profile": "warrant-pdf.contract.v1",
   "adr": "docs/adr/0003-trust-comes-from-the-reader.md",
-  "statement": "The reader's warrant verifier MUST run at settlement grade, and any finding other than the warning `unadopted root` MUST refuse.",
+  "statement": "The reader's warrant verifier MUST run at settlement grade; any finding other than the warning `unadopted root`, and a verifier that produces no report, MUST refuse.",
   "witnesses": [
-    "test_accept_signed_by_another_key_for_the_same_actor_refuses"
+    "test_accept_signed_by_another_key_for_the_same_actor_refuses",
+    "test_unavailable_verifier_refuses",
+    "test_verification_ran_at_settlement_grade"
   ],
   "mutants": [
     "base-grade",
-    "tolerate-all-warnings"
+    "tolerate-all-warnings",
+    "verifier-failure-escapes"
   ],
   "decisions": [
     {
@@ -28,6 +31,29 @@
       },
       "statement_sha256": "264bb26afdc96810336c00d8868c2ac37a3007b6594a8289f6f81b160bc50ae4",
       "previous_statement_sha256": "264bb26afdc96810336c00d8868c2ac37a3007b6594a8289f6f81b160bc50ae4"
+    },
+    {
+      "date": "2026-10-16",
+      "because": "A verifier that cannot run (wrong --warrant path) or prints no report raised an uncaught exception: no verdict, a traceback. The statement now names that case; it refuses as WARRANT.",
+      "counterexample": {
+        "witness": "test_unavailable_verifier_refuses",
+        "observed": "FileNotFoundError: [Errno 2] No such file or directory: '/nonexistent/warrant'",
+        "expected": "REFUSED WARRANT"
+      },
+      "statement_sha256": "0e4e7b6b2d25c043ee5ec649988d596beb9c5f9a1dfc32c36743319dedabb40d",
+      "previous_statement_sha256": "264bb26afdc96810336c00d8868c2ac37a3007b6594a8289f6f81b160bc50ae4"
+    },
+    {
+      "date": "2026-10-16",
+      "because": "Mutant 'base-grade' went OFF_TARGET once a missing report became a WARRANT refusal: every valid contract then refused, but no witness of this statement failed for the reason the statement names. Added a positive witness that the reader's warrant reported settlement grade.",
+      "counterexample": {
+        "witness": "test_verification_ran_at_settlement_grade",
+        "mutant": "base-grade",
+        "observed": "OFF_TARGET (17 tests of other statements failed, none of WPDF-T2)",
+        "expected": "a WPDF-T2 witness fails"
+      },
+      "statement_sha256": "0e4e7b6b2d25c043ee5ec649988d596beb9c5f9a1dfc32c36743319dedabb40d",
+      "previous_statement_sha256": "0e4e7b6b2d25c043ee5ec649988d596beb9c5f9a1dfc32c36743319dedabb40d"
     }
   ]
 }

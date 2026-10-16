@@ -158,5 +158,45 @@
   "find": "    out = bytearray(b\"%PDF-1.7\\n%\\xe2\\xe3\\xcf\\xd3\\n\")",
   "replace": "    import time\n    out = bytearray(b\"%PDF-1.7\\n%%%d\\n\" % time.time_ns())",
   "why": "the demo no longer reproduces"
+ },
+ {
+  "id": "iso-partial",
+  "statement": "WPDF-D3",
+  "file": "warrant_pdf/profile.py",
+  "find": "    if ts > MAX_ISO_TS:\n        return f\"unix {ts}\"\n",
+  "replace": "",
+  "why": "a large valid ts crashes the verifier"
+ },
+ {
+  "id": "nan-accepted",
+  "statement": "WPDF-E4",
+  "file": "warrant_pdf/bundle.py",
+  "find": "json.loads(raw.decode(\"utf-8\"), parse_constant=_no_constants)",
+  "replace": "json.loads(raw.decode(\"utf-8\"))",
+  "why": "NaN is parsed; Python and browser verifiers diverge"
+ },
+ {
+  "id": "entries-unbounded",
+  "statement": "WPDF-E4",
+  "file": "warrant_pdf/bundle.py",
+  "find": "    if len(records) + len(doc[\"blobs\"]) > MAX_ENTRIES:",
+  "replace": "    if False:",
+  "why": "a bundle the browser verifier cannot admit verifies here"
+ },
+ {
+  "id": "size-unbounded",
+  "statement": "WPDF-E4",
+  "file": "warrant_pdf/bundle.py",
+  "find": "    if length > MAX_BUNDLE:",
+  "replace": "    if False:",
+  "why": "an oversized declared length is read instead of refused"
+ },
+ {
+  "id": "verifier-failure-escapes",
+  "statement": "WPDF-T2",
+  "file": "warrant_pdf/verify.py",
+  "find": "    except (wcli.WarrantError, OSError) as e:",
+  "replace": "    except () as e:",
+  "why": "a missing or broken verifier crashes instead of refusing"
  }
 ]

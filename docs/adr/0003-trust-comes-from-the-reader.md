@@ -22,7 +22,7 @@ exists as a separate, narrow one.
 ## Normative
 
 - **WPDF-T1.** Verification MUST require a trust config supplied by the reader; keys are bound to actors only through it, and nothing in the document is read as trust.
-- **WPDF-T2.** The reader's warrant verifier MUST run at settlement grade, and any finding other than the warning `unadopted root` MUST refuse.
+- **WPDF-T2.** The reader's warrant verifier MUST run at settlement grade; any finding other than the warning `unadopted root`, and a verifier that produces no report, MUST refuse.
 
 ## Considered
 
@@ -53,4 +53,4 @@ exists as a separate, narrow one.
 ## Counter-vectors
 
 `test_without_reader_trust_refuses`, `test_counterparty_not_in_reader_trust_refuses`,
-`test_accept_signed_by_another_key_for_the_same_actor_refuses`.
+`test_accept_signed_by_another_key_for_the_same_actor_refuses`, `test_unavailable_verifier_refuses`.

@@ -20,6 +20,7 @@ class Result:
     display: str  # "MATCH", "DIFFERS", or "NO_PAGE" for a bare bundle
     text: list
     signers: list
+    grade: str = ""  # the grade the reader's warrant reported
     warnings: list = field(default_factory=list)
 
 
@@ -64,6 +65,20 @@ def arrange(records, blobs):
     return terms, (pid, prop), accepts
 
 
+def _run_warrant(cmd, records, blobs, trust_config):
+    """Record names, then the store, through the reader's warrant."""
+    with tempfile.TemporaryDirectory() as tmp:
+        for name, rec in records.items():
+            if wcli.warrant_id(cmd, rec["body"], tmp) != name:
+                raise Refusal("NAME_MISMATCH", f"record {name} does not hash to its name")
+        store = Path(tmp) / "store"
+        bundle.write_store(store, records, blobs)
+        code, report = wcli.verify_store(cmd, store, trust_config)
+    if code != 0 and report["ok"]:
+        raise wcli.WarrantError(f"exit {code} with ok:true")
+    return report
+
+
 def verify(pdf, trust_config, cmd="warrant", strict_display=False):
     if trust_config is None or not Path(trust_config).is_file():
         raise Refusal("NO_TRUST_CONFIG", "a reader trust config is required; the document cannot supply one")
@@ -72,15 +87,12 @@ def verify(pdf, trust_config, cmd="warrant", strict_display=False):
     bare = pdf.startswith(b'{"blobs":')
     raw = pdf if bare else bundle.extract(pdf)
     records, blobs = bundle.decode(raw)
-    with tempfile.TemporaryDirectory() as tmp:
-        for name, rec in records.items():
-            if wcli.warrant_id(cmd, rec["body"], tmp) != name:
-                raise Refusal("NAME_MISMATCH", f"record {name} does not hash to its name")
-        store = Path(tmp) / "store"
-        bundle.write_store(store, records, blobs)
-        code, report = wcli.verify_store(cmd, store, trust_config)
+    try:
+        report = _run_warrant(cmd, records, blobs, trust_config)
+    except (wcli.WarrantError, OSError) as e:
+        raise Refusal("WARRANT", f"the reader's verifier produced no report: {e}")
     unexpected = [f for f in report["findings"] if f["message"] != EXPECTED_WARNING or f["level"] != "WARN"]
-    if code != 0 or not report["ok"] or report["errors"] or unexpected:
+    if not report["ok"] or report["errors"] or unexpected:
         f = (unexpected or report["findings"] or [{"message": "not ok"}])[0]
         raise Refusal("WARRANT", f"{f.get('level', '')} {f.get('subject', '')[:16]} {f['message']}".strip())
     terms, propose, accepts = arrange(records, blobs)
@@ -92,4 +104,4 @@ def verify(pdf, trust_config, cmd="warrant", strict_display=False):
     if display == "DIFFERS" and strict_display:
         raise Refusal("DISPLAY_DIFFERS", "the file is not the canonical rendering of what was signed")
     signers = [(r["body"]["decision"], r["body"]["actor"]["id"]) for _, r in [propose] + accepts]
-    return Result(display, canonical_text(terms, propose, accepts), signers)
+    return Result(display, canonical_text(terms, propose, accepts), signers, report["grade"])

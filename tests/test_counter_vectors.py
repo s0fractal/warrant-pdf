@@ -3,6 +3,7 @@ and names the outcome it must produce. `witness:` lines bind a test to the
 normative statement it witnesses (contracts/, tools/contracts.py)."""
 import hashlib
 import json
+import re
 import shutil
 import sys
 import tempfile
@@ -84,9 +85,9 @@ class Scenario:
 
 class CounterVectors(unittest.TestCase):
 
-    def refused(self, pdf, code, trust=TRUST, **kw):
+    def refused(self, pdf, code, trust=TRUST, cmd=CMD, **kw):
         with self.assertRaises(Refusal) as cm:
-            verify(pdf, trust, CMD, **kw)
+            verify(pdf, trust, cmd, **kw)
         self.assertEqual(cm.exception.code, code, cm.exception.detail)
 
     def scenario(self, parties=None):
@@ -179,6 +180,25 @@ class CounterVectors(unittest.TestCase):
             verify(bundle.encode({a: rb, b: ra}, blobs), TRUST, CMD)
         self.assertEqual(cm.exception.code, "NAME_MISMATCH")
 
+    def test_nan_in_bundle_refuses(self):
+        """Python's json accepts NaN; JSON does not, and a browser verifier would refuse.
+        witness: WPDF-E4"""
+        raw = bundle.extract(PDF).decode()
+        self.refused(raw.replace('"sigs":[', '"sigs":[NaN,', 1).encode(), "BUNDLE_MALFORMED")
+
+    def test_more_entries_than_the_browser_verifier_admits_refuses(self):
+        """witness: WPDF-E4"""
+        records, blobs = parts()
+        for i in range(2049 - len(records) - len(blobs)):
+            data = b"%d" % i
+            blobs[hashlib.sha256(data).hexdigest()] = data
+        self.refused(rebuild(records, blobs), "BUNDLE_LIMIT")
+
+    def test_oversized_bundle_is_refused_before_reading(self):
+        """witness: WPDF-E4"""
+        forged = re.sub(rb"len=\d+", b"len=8388609", PDF, count=1)
+        self.refused(forged, "BUNDLE_LIMIT")
+
     # --- trust (ADR-0003) --------------------------------------------------
 
     def test_without_reader_trust_refuses(self):
@@ -200,6 +220,16 @@ class CounterVectors(unittest.TestCase):
         s = self.scenario()
         s.accept(s.propose(), key=s.mallory)
         self.refused(s.pdf(), "WARRANT")
+
+    def test_verification_ran_at_settlement_grade(self):
+        """Honest positive: Bob's bound key verifies, and the grade is the one that binds keys.
+        witness: WPDF-T2"""
+        self.assertEqual(verify(PDF, TRUST, CMD).grade, "settlement")
+
+    def test_unavailable_verifier_refuses(self):
+        """No report is not a pass, and not a crash either.
+        witness: WPDF-T2"""
+        self.refused(PDF, "WARRANT", cmd="/nonexistent/warrant")
 
     # --- profile (ADR-0002) ------------------------------------------------
 
@@ -311,6 +341,15 @@ class CounterVectors(unittest.TestCase):
         self.assertEqual(r.display, "DIFFERS")
         self.assertIn("3. The price is 100 EUR, paid in cash at handover.", r.text)
         self.refused(forged, "DISPLAY_DIFFERS", strict_display=True)
+
+    def test_largest_timestamp_warrant_admits_verifies(self):
+        """warrant admits ts up to 2^53-1; the year is then far past 9999.
+        witness: WPDF-D3"""
+        s = self.scenario()
+        s.accept(s.propose(ts=2**53 - 2), ts=2**53 - 1)
+        r = verify(s.pdf(), TRUST, CMD)
+        self.assertEqual(r.display, "MATCH")
+        self.assertIn("  accept by bob@demo.test at unix 9007199254740991", r.text)
 
     def test_re_rendered_elsewhere_still_verifies(self):
         """Another rendering of the same bundle: signatures hold, the page is flagged.
